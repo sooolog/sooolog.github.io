@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
+categories: [ 네트워크 기본 ]
 image: assets/images/11.jpg
 description: "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 featured: true
