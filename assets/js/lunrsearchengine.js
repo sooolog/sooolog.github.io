@@ -33,7 +33,7 @@ var idx = lunr(function () {
 function lunr_search(term) {
     document.getElementById('lunrsearchresults').innerHTML = '<ul></ul>';
     if(term) {
-        document.getElementById('lunrsearchresults').innerHTML = "<p>Search results for '" + term + "'</p>" + document.getElementById('lunrsearchresults').innerHTML;
+        document.getElementById('lunrsearchresults').innerHTML = "<p>'" + term + "' 에 대한 검색결과</p>" + document.getElementById('lunrsearchresults').innerHTML;
         //put results on the screen.
         var results = idx.search(term);
         if(results.length>0){
@@ -75,7 +75,7 @@ function lunr_search(term) {
                 document.querySelectorAll('#lunrsearchresults ul')[0].innerHTML = document.querySelectorAll('#lunrsearchresults ul')[0].innerHTML + "<li class='lunrsearchresult'><a href='" + url + "'><span class='title'>" + title + "</span><br /><small><span class='body'>"+ body +"</span><br /><span class='url'>"+ url +"</span></small></a></li>";
             }
         } else {
-            document.querySelectorAll('#lunrsearchresults ul')[0].innerHTML = "<li class='lunrsearchresult'>기획하는 개발자 - '"영어만 검색이 됩니다."'</li>";
+            document.querySelectorAll('#lunrsearchresults ul')[0].innerHTML = "<li class='lunrsearchresult'>기획하는 개발자 - '영어만 검색이 됩니다.'"</li>";
         }
     }
     return false;
