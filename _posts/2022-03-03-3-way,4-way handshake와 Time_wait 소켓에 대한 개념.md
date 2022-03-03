@@ -1,14 +1,12 @@
 ---
 layout: post
-title:  "💻 3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
-author: john
+title:  "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 categories: [ Jekyll, tutorial ]
 tags: [red, yellow]
 image: assets/images/11.jpg
-description: "My review of Inception movie. Acting, plot and something else in this short description."
+description: "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 featured: true
 hidden: true
-rating: 4.5
 ---
 
 <p align="center">
