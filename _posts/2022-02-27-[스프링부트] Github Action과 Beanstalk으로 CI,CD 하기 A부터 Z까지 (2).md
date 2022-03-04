@@ -160,7 +160,7 @@ Github Action이 시작된다는 의미이다. 즉, Github Action 트리거 브�
 > [push외에 다른 이벤트에 대한 Github Action 작동](https://hwasurr.io/git-github/github-actions/)
 > [pull request에 대한 트리거 설정 코드](https://stalker5217.netlify.app/devops/github-action-aws-ci-cd-1/)
 
-><br>
+<br>
 
 ##### (2).수동 실행
 ```yml
