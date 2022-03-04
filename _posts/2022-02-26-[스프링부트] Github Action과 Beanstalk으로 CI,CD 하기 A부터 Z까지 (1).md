@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (1)"
+title:  "[스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (2)"
 categories: [ 빌드와 배포 ]
-image: https://user-images.githubusercontent.com/59492312/150467453-6427d3f0-5933-4adb-b99d-0710a458bf77.png
+image: https://user-images.githubusercontent.com/59492312/151473981-f0504fde-808a-4c1f-9cea-a887f2bb9ace.png
 ---
 
 <p align="center">
@@ -12,181 +12,449 @@ image: https://user-images.githubusercontent.com/59492312/150467453-6427d3f0-593
 </p>
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151303176-57c2a564-5687-4605-b90f-f418c7e71b0a.png">
+<img src="https://user-images.githubusercontent.com/59492312/151309696-7ab7e274-101f-4467-ba73-74c65cc872bf.png">
 </p>
 
-# 👣 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (1)
+# 📖 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (2)
 
-* CI/CD의 개념
-* CI/CD의 구성요소와 그에 관한 개념
-* CI/CD 순서에 대한 내용과 Pipeline 개념
+* Github Action을 위한 deploy.yml작성과 이해
+* bash, shell, git bash, vim, cli, 터미널의 기본개념 훑고가기
+* 깃헙에 workflow사용을 위한 push에 Personal Access tokens로 권한 부여하기
 
+> 모든 코드는 [깃헙](https://github.com/sooolog/dev-spring-springboot)에 작성되어 있습니다.
 * * *
 
 <br>
-
-### 1.우선은 CI/CD의 개념과 추가로 알아야 할 용어들에 대해 정리하고 가도록 하겠다.(바로 CI/CD 실무로 넘어가고 싶다면 글(2)로 넘어가면 된다.)
+    
+### 1.스프링부트에서 CI/CD는 Github Action과 Beanstalk으로 진행하도록 한다.
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/150467453-6427d3f0-5933-4adb-b99d-0710a458bf77.png">
+<img src="https://user-images.githubusercontent.com/59492312/151473981-f0504fde-808a-4c1f-9cea-a887f2bb9ace.png">
 </p>
 
-우리는 CI(Continuous Integration)/CD(Continuous Deployment)의 각 과정들과 개념 대해 알아보기에 앞서,
-이를 이루고 있는 일련의 과정들에 대해 먼저 보도록 하겠다.   
+기존에는 CI/CD 툴로 Travic Ci, Jenkins, AWS Code Deploy를 많이 사용했었다. 또는,      
+Travis CI + AWS Code Deploy     
+Travis CI + AWS Beanstalk   
+와 같은 환경조합으로 CI/CD 파이프라인을 구축했다.
 
-그림에서 보듯이, CI(지속적통합)는 Build,Test,Merge로 이루어져있다.   
-CD(지속적배포)는 Continuouse Delivery(지속적인 서비스 제공) + Continuous Deployment(지속적인 배포)가 합쳐진
-용어이다.
+하지만, 대세가 Travis CI에서 Github Action으로 넘어가고있으며, Auto Scaling과 Load Balancer, 클라우드 워치 등을 한번에
+관리할 수 있는 Beanstalk 또한 많이 사용되고 있기에 우리는 Github Action + Beanstalk으로 CI/CD 파이프라인을 구축해보도록 하겠다.
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/151483421-031667e6-0d78-4a8e-94a6-12b933cbff47.png">
+</p>
+
+Github Action과 Beanstalk를 사용했을 경우의 기본 구조는 이러하다.
 
 #### 🪁 References
-* 참조링크 : [CI/CD 개념 그리고 흐름 (1)](https://abbo.tistory.com/225)
-* 참조링크 : [CI/CD 개념 그리고 흐름 (2)](https://artist-developer.tistory.com/24)
+* 참조링크 : [기존 CI/CD 툴 (1)](https://artist-developer.tistory.com/24)
+* 참조링크 : [기존 CI/CD 툴 (2)](https://jojoldu.tistory.com/543)
 
 <br>
 
 
 
-### 2.CI의 Build, Test, Merge는 무엇이고 그렇다면 컴파일은 어떻게 연동되는걸까 ?
+### 2.Github Action으로 빌드하기 위한, deploy.yml 작성
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151288599-0dc84d6a-1e09-4a94-97ba-2a6e0b9f7cbb.png">
+<img src="https://user-images.githubusercontent.com/59492312/151495796-3c4e532a-bbb3-433e-939d-6aa87ccfddee.png">
 </p>
 
-#### (1).Build
-우선, Build는 소스 코드 파일을 컴퓨터에서 실행할 수 있는 독립적인 형태로 변환하는 과정과 그 결과를 말한다.
-쉽게 말하자면, Java프로젝트를 진행한다면 개발자가 작성한 A.java와 여러가지 정적 파일등에 해당하는 resource가 존재한다.
-빌드를 한다면 소스코드(A.java)를 컴파일해서 .class로 변환하고 resource를 .class에서 참조할 수 있는 적절한 위치로 옮기고 
-META-INF와 MANIFEST.MF 들을 하나로 압축하는 과정을 의미한다. 즉, 컴파일을 빌드의 부분집합이라고 생각하면 된다.
-또한, 빌드 과정을 도와주는 도구를 Build Tool이라고 한다. 즉, 컴파일 된 코드를 실제 실행할 수 있는 상태로 만드는 
-일을 Build 라는 개념으로 생각하면 된다.
+Github repository의 action에서 템플릿을 만들어서 해당 코드들을 적용해도 되지만, 우리는 프로젝트내에서 deploy.yml을 작성하여 
+진행해 보도록 하겠다.
+
+위의 그림처럼 루트 디렉토리에서 .github/workflows/deploy.yml을 만들어 준다. 저처럼 .github 폴더에 아이콘이 뜨길
+원한다면, [extra-icons 플러그인](https://plugins.jetbrains.com/plugin/11058-extra-icons)을 적용해주면 된다.
+이 외에도 인텔리제이 아이콘 플러그인 검색해서 원하는것을 설치하고 적용해 주면 된다. 
 
 <br>
 
-> 스프링부트 프로젝트에서 쓰는 Gradle도 Build Tool의 일종이다.
+> 필자는 CI/CD 관련 코드들을 프로젝트 내에서 작성하여 한번에 관리하는것을 선호한다. Github에서 작성하여 적용하는
+> 방법도 있으니, 궁금하신분들은 찾아보셔서 한번쯤 공부해보는것도 좋다.
 
 <br>
+
+```yml
+name: dev-spring-springboot
+
+on:
+  push:
+    branches:
+      - master # (1).브랜치 이름
+  workflow_dispatch: (2).수동 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # (3).OS환경
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 # (4).코드 check out
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 1.8 # (5).자바 설치
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash # (6).권한 부여
+
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        shell: bash # (7).build 시작
+
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss 
+          utcOffset: "+09:00"작 # (8).build 시점의 시간확보
+
+      - name: Show Current Time
+        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}" 
+        shell: bash # (9).확보한 시간 보여주기
+```
+
+Github Action으로 빌드를 하기 위해서는 위의 코드들을 deploy.yml에 작성해주면 된다. 그럼 각각의 문단의 코드들이
+어떠한 의미가 담긴것인지 보도록 하겠다.
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151288671-4483d871-64ac-4f4f-be8d-cb9d06189b8d.png">
+<img src="https://user-images.githubusercontent.com/59492312/151495800-119b0984-2334-454d-8c84-0996c28d9495.png">
 </p>
 
-#### (2).Test,Merge
-그 다음은 Test와 Merge인데, test는 말 그대로 단위테스트나 종합테스트 그 외에 해당 코드가 잘되는지
-테스트하는것을 말한다. 또한 Merge는 코드병합으로 깃과 깃헙을 이용하 서로 다른 branch에서 commit 한것을 pull request를
-받아들임으로써 코드를 병합하는것이다.(merge에 대해 헷갈린다면, 깃과 깃헙을 공부하고 오자.)
+name은 위의 사진처럼 프로젝트의 해당 코드를 push하면 해당하는 깃헙의 repository에서 메뉴 목록에 Actions를 클릭하게 되면 나오는
+화면의 글자를 의미한다.
+
+조금 더 쉽게 말하자면, Commit했을때 설명 + deploy.yml의 name + 내가 여태 Push한 workflow갯수 로 표시되는거다.
+필자는 commit할때 github action build라고 commit message를 적었기에 이와같이 나온거다.
+
+<br>
+
+> 즉, 이 name은 Repo Action 탭에 나타나는 이름으로 실제 workflow 진행창에는 나오지 않는다. 그렇기에
+> build나 배포에 영향을 주는것은 아니고 통상 필자처럼 프로젝트명으로 입력하거나 원하는 nmae을 입력하면 된다.  
+> [name에 대한 내용](https://stalker5217.netlify.app/devops/github-action-aws-ci-cd-1/)
+
+<br>
+
+이제 나머지 #(1) 부터 #(9) 까지의 개념들에 대해 설명하도록 하겠다.
+
+##### (1).브랜치 이름
+
+```yml
+on:
+  push:
+    branches:
+      - master # (1).브랜치 이름
+```
+
+이 'master'가 들어가는 자리가 branch의 이름인데, 해당하는 branch 이름으로 push가 진행된다면
+Github Action이 시작된다는 의미이다. 즉, Github Action 트리거 브랜치인것이다. master로 적어놓았지만,
+다른 브랜치에서 Github Action을 실행시키고 싶다면 해당하는 branch 명을 바꾸어도 된다.
+
+<br>
+
+> 당연히, 지정한 브랜치외에 다른 명을 갖은 브랜치에서 push를 하게되고, 레포지토리에 pull request되어
+> merge가 진행이 되었다고 해도, Github Action은 실행되지 않는다. 추가로 push외에 pull request나
+> 다른 이벤트에 대해서도 트리거를 작동시키게 할 수 있다.      
+> [push외에 다른 이벤트에 대한 Github Action 작동](https://hwasurr.io/git-github/github-actions/)
+> [pull request에 대한 트리거 설정 코드](https://stalker5217.netlify.app/devops/github-action-aws-ci-cd-1/)
+
+><br>
+
+##### (2).수동 실행
+```yml
+on:
+  workflow_dispatch: # (2).수동 실행
+```
+
+위의 push이벤트외에도 깃헙액션을 수동으로 실행하는것도 가능하게 하는 옵션이다.
+
+
+##### (3).OS 환경
+
+```yml
+jobs:
+  build:
+    runs-on: ubuntu-latest # (3).OS환경
+```
+
+해당 Github Action 스크립트(여기서는 jobs의 steps들을 의미한다. 조금 더 쉽게 말하자면, (3)~(9)까지의
+단계들을 말하며 해당 workflow를 말한다. job,step,workflow에 대해 잘 모른다면 만 아래의 '추가로'를 참고하자.)
+가 작동될 OS 환경 지정하는것이다.
+
+<br>
+
+> Github Action의 workflow는 Runner라고 하는 Github Action Runner 어플리케이션이 설치된 인스턴스 서버에서
+> 실행이 된다. 그 서버의 OS 환경을 지정하는것이다. 
+
+<br>
+
+일반적으로, 웹 서비스의 OS는 우분투보다는 센토를 많이 쓰는데, Github Action에서는 공식지원하는 OS목록에는
+Centos가 없기에 우분투를 대신 사용하도록 한다.
+
+<br>
+
+> 우분투를 선택한다고 해도, 우리가 하려는 CI/CD에는 영향을 주지않으니 걱정하지 않아도 된다.
+
+<br>
+
+[OS목록](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idruns-on)을 본다면
+우분투의 버전들이 나와있다. 현재 Ubuntu-latest는 Ubuntu 20.04와 같다고 나와있다.(필자가 글을 작성할 당시의 버전이니 조금 달라져 있을수도 있다.)
+ubuntu-latest로 지정하거나 ubuntu-20.04로 적어주면 된다.
+
+##### (4).코드 check out
+
+```yml
+jobs:
+  build:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 # (4).코드 check out
+```
+
+말 그대로, 코드 check out인데, 이 check out이라는 말은 개발용어에서 자주 등장하며 여러 의미로 쓰이니
+간단하게 짚고 넘어가도록 하겠다.   
+
+1. 형상관리 툴인 깃같은곳에서 소스코드를 내려받을 때 쓰는 check out : 이 경우에는 말 그대로 해당 소스코드를
+내려받는것을 의미한다. 여기서는 스프링부트 프로젝트 소스코드를 내려받는것이다.
+
+2. git checkout <branch name>처럼 terminal과 같은 Cli 사용하는 경우 : 특정 브랜치 여기서는 branch name에
+해당하는 브랜치를 사용하겠다는것을 명시적으로 보여주는 것이다.
+
+> [check out의 두가지 의미](https://backlog.com/git-tutorial/kr/stepup/stepup2_3.html)
+
+##### (5).자바 설치
+
+```yml
+jobs:
+  build:
+    steps:
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 1.8 # (5).자바 설치
+```
+
+Github Action이 실행될 OS 즉, Runner에 Java를 설치하는 것이다. with: java-version: 1.8은 내가 다운받을
+자바의 버전을 의미하는데, 자바11을 원한다면 자바11에 맞는 코드를 적어주면 된다. 필자는 자바8로 설치를 할것이다. 실제로도 가장
+많이 쓰이고, 상용화가 잘 되있는 자바8을 많이 사용한다.
+
+##### (6).권한 부여
+```yml
+jobs:
+  build:
+    steps:
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash # (6).권한 부여
+```
+
+다음 step인 gradle wrapper를 실행하여 build할 수 있도록 실행 권한 (+x)을 부여해주는 것이다.
+실제로 터미널에서 ./gradlew build 명령어로 빌드를 실행하는데, Permission Denied가 되기 때문에 그 전에
+chmod +x gradlew  를 터미널에 입력 하여 권한을 미리 부여해주는 것이다.
+
+<br>
+
+> run은 Runner에서 명령어를 실행하라는 의미이다.    
+> [./gradlew build를 위한 권한 부여](https://javalism.tistory.com/101)    
+
+<br>
+
+**bash가 나왔으니 bash와 그 외에 반드시 알아야 할 기본용어에 대해 간단하게 한번 훑고 지나가도록 하겠다.** 그 다음 build에 대한 내용을 바로 보고싶다면 다음 문단으로
+넘어가면 된다.
+
+CLI, 터미널, 커맨드 프롬프트, 쉘, Bash, Git Bash, shell script, vim에 대해 알아보겠다.
+
+(1). CLI는 Command Line Interface로 말 그대로 명령 줄 인터페이스로 터미널이나 커맨드 프롬프트처럼 한 줄의 명령어로
+사용자와 컴퓨터가 상호 작용하는 '방식'을 의미한다.
+
+(2). 터미널과 커맨드 프롬프트는 CLI를 가능하게 하는것으로 맥에서는 티미널이 쓰이고, 윈도우에서는 커맨드 프롬프트가 쓰이는것이다.
+
+(3). 쉘은 터미널을 사용하기 위한 소프트웨어 환경을 뜻한다. 즉, 운영체제 상에서 사용자가 입력하는 명령을 읽고 해석하여
+실행해주는 것으로, 사용자와 컴퓨터 사이에 소통하기위한 언어로 볼 수 있다.
+
+(4). bash는 쉘의 한 종류이다. 쉘은 언어라 했는데, 언어에도 종류가 있듯이 bash가 linux에서 사용하는 쉘의 한 종류이며,
+이 bash는 linux에서 가장 많이 사용되며 기본 쉘이다. 조금 더 이해하기 쉽게 예를 들자면, cd, ls, rm 등과같은것이 모두 bash인것이다.
+
+(5). Git bash란, 윈도우에서는 커맨드 프롬프트라는 CLI를 사용하는데, bash를 사용하려면 git bash가 있어야 하는것이다.
+윈도우에서 git bash를 다운받으면 깃과 bash 둘다 쓸 수 있다.
+Bash는 CLI(Command Line Interface)이다. 리눅스와 맥에서는 기본적으로 Bash가 쓰인다.
+
+(6). 쉘 스크립트는 쉘에서 사용할 수 있는 명령어들의 조합을 모아놓은 파일이다. 한줄씩 순차적으로 읽으면서 명령어들을 실행시켜주는 인터프리터 방식의 프로그램
+이다.
+
+(7). 마지막으로 vim은 텍스트 편집기이다. cd, ls와 같은 bash 명령어 외에, vim hi.text처럼 텍스트를 만들거나 수정 등 텍스트
+편집기용 명령어이다.
+
+<br>
+
+> [git bash의 개념](https://2srin.tistory.com/117)    
+> [CLI의 개념](https://ko.wikipedia.org/wiki/%EB%AA%85%EB%A0%B9_%EC%A4%84_%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4)    
+> [쉘과 bash의 개념 (1)](https://dinfree.com/lecture/core/101_basic_3.html)   
+> [쉘과 bash의 개념 (2)](https://minkwon4.tistory.com/159)      
+> [shell script의 개념](https://minkwon4.tistory.com/159)    
+> [vim의 개념](https://ko.wikipedia.org/wiki/Vim)    
+
+<br>
+
+##### (7).build 시작
+```yml
+jobs:
+  build:
+    steps:
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        shell: bash # (7).build 시작    
+```
+
+마지막 build의 시작이다. ./gradlew clean build 명령어를 실행하여 빌드를 시작한다. 보이는 바와 같이 shell: bash는 bash를 사용하여서
+build를 시작하라는 의미이다. github action으로 빌드하기는 여기까지이다.
+
+##### (8).build 시점의 시간 확보
+
+(7)까지만 해도 build는 되는데, 왜 (8),(9) 코드들이 있는걸까?
+용도는 두가지이다.    
+첫번째 : 빌드되는 시점의 시간을 보기위함    
+두번째 : 후에 배포시킬때 version label이란것에 빌드된 시간을 넣어서 어플리케이션 버전으로 사용하기 위함이다.
+무슨말인지 모르겠다면, 아래 차근차근 설명하니 따라보면 충분히 이해가 될 것이다.
+
+```yml
+jobs:
+  build:
+    steps:
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss # (1)
+          utcOffset: "+09:00"작 # (8).build 시점의 시간확보
+```
+
+1466587594/get-current-time이라는 것을 사용하여(runner에 있는) 빌드시점의 시간을 확보해 놓는것이다.
+format은 YYYY-MM-DDTHH-mm-ss로 해놓아서 확보해놓을 시간의 형태를 정해놓고, utcOffset까지 설정해놓아서
+한국 시간으로 맞춰서 확보해놓는것이다.(UTC 기준이기 때문에 한국시간에 맞추려면 +09:00을 해주어야 한다.)
+
+그렇다면, 이렇게 확보해놓은 빌드시점의 시간은 어떻게 쓰일까 ?
+
+##### (9).확보한 시간 보여주기
+```yml
+jobs:
+  build:
+    steps:
+      - name: Show Current Time
+        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}" # (2)
+        shell: bash # (9).확보한 시간 보여주기
+```
+
+다음 (9)를 보자. echo ~ }}"라고 쓰여진 코드 부분은 일종의 화면에 출력하는것이다. 즉, 내가 프로젝트를 push를 해서
+github action으로 build가 완료가 됬을때 확보한 시간을 github action 빌드 상태창에 시간이 어떻게 되는지 보여주겠다는
+의미이다.
+
+조금 이해가 안갈 수 있다. 아래 사진을 보도록 하자.
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/151648743-ae6c4a39-f124-4be6-9df6-0f649e9c15c8.png">
+</p>
+
+잠시 후에 Push를 하고 깃헙 레포지토리에 Action탭을 클릭하면 실시간으로 push한 프로젝트가 build가 잘 되고 있는지 확인할 수 있는 창이다.
+이곳에 Show Current time에 CurrentTime=2022-01-28T14-47-53가 잘 출력된것을 볼 수 있다.
+(직접 해보면 더 빠르게 이해가 될 것이다. 곧 직접해보도록 하겠다.)
+
+<br>
+
+> 그렇다면, 앞서 말한 Version Label에 사용되어서 배포한 어플리케이션의 버전 식별용으로 사용된다는 것은 언제쓰는건가요 ?
+> 라고 물어볼 수 있다. 첫 (8)에서 확보한 시간을 바탕으로 다음 장에 배포를 진행할때, 그대로 Version Label에 적용하여 식별용으로
+> 어떻게 사용되는지 보여줄 것이다. 다음 글 (3) 배포하기로 넘어가서 설명하도록 하겠다.
 
 <br>
 
 ##### 👨‍💻 추가적인 얘기
-그럼 CI에 대해 조금 더 풀어 말하자면, 어플리케이션의 새로운 코드 변경 사항이 정기적으로 빌드되고
-테스트 되어 공유 레포지토리에 병합되는것을 얘기 한다. 즉, 이를 수동이 아닌 자동으로 지속적으로 쉽게 해주는 환경(CI)을 말한다.
-(CI의 단계와 순서에 대해서는 글 후반부에 추가적으로 얘기하겠다.)
+
+위에서 name은 단순히 github action의 workflow에서 단계별 명칭을 보여주는 역활만 하기 때문에
+본인이 알아보기에 맞게 새롭게 작성해도 된다.
+
+아래는 그 예시이다.    
+필자는 위의 name에서 추가로 의미없는 숫자를 덧붙여 보았다.
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/151544083-af4a11b6-7388-4b97-b135-6dbba56250f4.png">
+</p>
 
 <br>
 
-> 여기서 우리가 사용하는 Git은 형상관리(=구성관리)툴로, 버전이나 변경사항을 체계적으로 추적하고 통제하는것을 가능하게 해준다.
+> 깃헙 레포지토리에서 직접 Github Action을 실행시켜보고 확인해보면 더 정확하게 이해가 될 것이다.
 
 <br>
 
 #### 🪁 References
-* 참조링크 : [빌드의 개념](https://choseongho93.tistory.com/296)
-* 참조링크 : [CI의 전반적인 개념](https://artist-developer.tistory.com/24)
-* 참조링크 : [형상관리,구성관리 개념](https://ko.wikipedia.org/wiki/%EA%B5%AC%EC%84%B1_%EA%B4%80%EB%A6%AC)
-
+* 참조링크 : [deploy.yml에 관한 전반적인 내용](https://jojoldu.tistory.com/543)
 
 <br>
 
 
 
-### 3.그렇다면, 이번에는 CD의 Continuous Delivery와 Continuous Deployment에 대해 보도록 하겠다.
+### 3.직접 PUsh를 해서 build를 진행해보도록 하겠다.
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151291909-4045e805-9d64-41b1-b809-f74ba7c8e145.png">
+<img src="https://user-images.githubusercontent.com/59492312/151648904-65022ea0-b707-4377-a6ca-e98c08a872d8.png">
 </p>
 
-CD는 Continuous Delivery 혹은 Continuous Depolyment 두 용어 모두의 축약어이다.   
-Continuous Delivery는 지속적 제공으로, CI를 통해서 새로운 소스코드의 빌드와 테스트 병합까지 
-성공적으로 진행되었다면, 빌드와 테스트를 거쳐 github과 같은 저장소에 업로드하는 것을 의미한다.   
-Continuous Deployment는 지속적 배포로, 이렇게 지속적 제공으로 인해 성공적으로 병합된 내역을 저장소뿐만이 아니라 클라이언트가 사용할 수 있는 환경까지 배포하는것을 의미한다.
-예를들면, EC2같은곳을 말한다.       
-  
+로컬 저장소에서(IntelliJ 등 그 외) 원격 저장소인 깃헙 레포지토리로 PUSH를 하게되면, github action이 실행된다.
+위와같이 빌드가 잘되면 모두 초록색으로 체크가 된다.
+
+<br>
+
+> 해당 화면을 보려면 내가 push한 레포지토리로 들어가서 위와같이 Actions탭을 누르면 된다.
+
+<br>
+
 #### 🪁 References
-* 참조링크 : [CD의 두 개념 (1)](https://abbo.tistory.com/225)   
-* 참조링크 : [CD의 두 개념 (2)](https://ggn0.tistory.com/118)   
+* 참조링크 : [deploy.yml에 관한 전반적인 내용](https://jojoldu.tistory.com/543)
 
 <br>
 
 
 
-### 정리 및 추가내용
+
+### 4.(push가 실패하는 분들만 보면 된다.)
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151293092-275d1aa6-cf5f-4289-99f9-c3216fe0f200.png">
+<img src="https://user-images.githubusercontent.com/59492312/151649056-26134ea1-734c-4aff-ad41-c28eeac75d54.png">
 </p>
 
-#### 1.CI와 CD의 순서에 대해서 정리
-
-위에서 통상적인 CI와 CD의 순서는 CI의 build, test, merge가 끝나면 공유 레포지터리로 코드가 공유되고(Continuous Delivery) 
-그 이후에 실제 서비스 서버에 배포(Continuous Deployment)하는 것을 CI/CD의 통상적인 순서라고 보았다.
-
-첫번째 CI/CD순서    
-A팀에 개발자가 5명 존재한다. 이 팀은 각각, 코드 작업을 완료하여 github에 push한다.
-그리고 모인 코드는 병합을 거치게 된다. 그런데 병합 과정에서 동일한 코드를 수정한 경우 충돌이 발생하게 된다.
-발생한 충돌을 해결하기 위해 수동으로 작업을 진행한다. 그 다음 배포를 해야하는데, 배포 하기에 앞서 코드에 문제가 없는 지 테스트를 진행한다.
-그런데 코드에 치명적인 버그가 발생한다. 이 버그를 해결하기 위해 이 코드와 관련된 팀원이 일을 진행한다.
-
-이처럼 A팀은 코드 푸시 -> 병합 -> 충돌 발생시 해결 -> 기능 테스트 작업을 매번 거친다.
-
-두번째 CI/CD순서    
-개발자 구현한 코드를 기존 코드와 병합한다.(master branch가 아닌 다른 branch에서 했다고 봐도되고, 아니면 원래부터
-master branch로 push하여 병합하는거로 볼 수도 있다.) 병합된 코드가 올바르게 동작하고 빌드되는지 검증한다.
-테스트 결과 문제가 있다면, 수정하고 다시 다시 코드를 작성하여 병합하고 그게 아니라면 배포를 진행 한다.
-
-세번째 CI/CD순서    
-CI를 진행할때, build를 하면서 중간에 test를 하는 경우도 있다. 또한, 실제 github action에서 
-build할때 test를 진행하면서 build를 하게된다.(Action칸에 보면, build 프로세스를 눌러오면 알 수 있다.)
-
-정리하자면, 
-CI/CD 파이프라인은 개발 플로우마다 조금씩 다르거나 추가될 수 있는것이다. 깃헙액션과 빈스톡(다음장에서
-본격적으로 진행할 CI/CD는 깃헙액션과 빈스톡으로 사용하여 진행할 것이다.)을 사용하는 경우에 혼자 개발하는 경우는
-원격 레포지토리에 push를하고 merge한다음에 build하는 과정에서 test를 진행한다. build가 무사히 진행된다면
-그 이후에 실제 서버 환경에 배포를 진행하게 된다.(원격 레포지토리에 push를 하기전에 단위테스트 등을 진행할 수도 있다.)
-그게 아니면 여러 개발자가 branch를 만들고, 로컬 저장소에서 코드작성과 테스트까지 진행한 후에 원격 레포지토리에 push를
-하게하고(master 브랜치가 push 했을때만 build되게 설) 이를 merge하여, master 브랜치에서 최종 test를 하고 다시 정
-원격 레포지토리에 push하여 test를 하며 build를 진행할 수도 있다. 즉, 이 CI/CD의 과정은 개발 플로우에 따라 얼마든지 달라질 수 있다는것을 알고가자.
-
-<br>
-
-> [첫번째 CI/CD순서](https://abbo.tistory.com/225)   
-> [두번째 CI/CD순서](https://ggn0.tistory.com/118)    
-> 세번째 CI/CD순서 - aws 혼자구현하기 책 298pg    
-
-<br>
-
-#### 2.Pipeline(파이프라인)의 개념
+기본적으로 로컬에서 원격 깃헙으로 push를 하거나 아니면 workflows를 작동시키려면 깃헙 계정의 settings로 들어가서(레포지토리의 setting이 아니다.)
+Personal access tokens에서 토큰을 발급받아서 권한을 부여해주어야 가능하다.
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151294755-efebeccc-27c4-407a-a846-8ad1d89c7515.png">
+<img src="https://user-images.githubusercontent.com/59492312/151649059-44daf835-0c0b-4a9e-b194-eaffa5729b5b.png">
 </p>
 
-여기서 파이프라인의 개념은 코드를 컴파일(Compile), 빌드(Build) 그리고 배포(Deploy) 하게 해주는 자동화된 프로세스들의 묶음(set)을
-이야기 한다. CI만 있는 프로세스들의 묶음을 CI파이프라인이라고도 하며, CD들만 있는 프로세스들의 묶음을 CD파이프라인이라고도 한다.
-통상, CI/CD의 전 단계를 CI/CD파이프라인이라 부른다. AWS에는 CodePipeline이라고 파이프라인을 자동화하여 완전관리형 지속전달 서비스도 있다고 한다.
-
-<br>
-
-> [Pipeline의 개념](https://linux.systemv.pe.kr/%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%97%94%EC%A7%80%EB%8B%88%EC%96%B4%EB%A7%81%EC%97%90%EC%84%9C-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8pipeline%EC%9D%80-%EB%AC%B4%EC%97%87/)   
-> [CI와 CD파이프라인](https://ichi.pro/ko/circleci-dae-gitlab-olbaleun-ci-cd-dogu-seontaeg-273919299873289)   
-> [CI와 CD파이프라인](https://www.redhat.com/ko/topics/devops/what-cicd-pipeline)   
-> [AWS CodePipeline](https://aws.amazon.com/ko/codepipeline/)    
+위 화면처럼, 보통 우리가 commit하고 push할때와는 다르게 workflow를 선택해주고 토큰을 발급받아서 사용해야 권한이 부여되고 정상적으로 push가 되는것이다.
+만약, access token에 대해 아직 잘 모르겠다면, 깃헙 access token으로 원격 저장소 push하기 글들을 찾아본다면 확실하게 지금의 내용이 이해가 될것이다.
 
 <br>
 
 
 
 ### 🚀 추가로
-본격적인 실습은 (2)글부터 진행하도록 하겠다.
+
+깃헙액션의 코어 개념에 대해 간단하게 정리하도록 하겠다.    
+
+**Workflow** : 자동화된 전체 프로세스로(즉, 위에서는 jobs에 있는것들로, (3)부터 (9)까지가 하나의 workflow인것이다.). 하나 이상의 Job으로 구성되고, Event에 의해 예약되거나 트리거될 수 있는 자동화된 절차를 말한다. Workflow 파일은 YAML으로 작성되고, Github Repository의 .github/workflows 폴더 아래에 저장된다. Github에게 YAML 파일로 정의한 자동화 동작을 전달하면, Github Actions는 해당 파일을 기반으로 그대로 실행시킨다.    
+
+**Event** : Workflow를 트리거(실행)하는 특정 활동이나 규칙. 예를 들어, 누군가가 커밋을 리포지토리에 푸시하거나 풀 요청이 생성 될 때 GitHub에서 활동이 시작될 수 있다.   
+
+**Job** : Job은 여러 Step으로 구성되고, 단일 가상 환경에서 실행된다. 
+
+**Step** : Job 안에서 순차적으로 실행되는 프로세스 단위.   
+
+**Runner** : Gitbub Action Runner 어플리케이션이 설치된 일종의 서로, Workflow가 실행될 인스턴스이다.      
+
+#### 🪁 References
+* 참조링크 : [깃헙액션의 코어개념](https://velog.io/@ggong/Github-Action%EC%97%90-%EB%8C%80%ED%95%9C-%EC%86%8C%EA%B0%9C%EC%99%80-%EC%82%AC%EC%9A%A9%EB%B2%95)
 
 <br>
 
-태그 : #형상관리 #구상관리 #CI/CD #build #test #merge #Pipeline
+
+
+태그 : #Github Action, #Benastalk, #깃헙액션 코어개념, #extra-icons 플러그인, #deploy.yml, #깃헙액션 코어개념, #workflow, #runner, #job, #event, #step, #check out, #check out의 두가지 의미, #bash, #shell, #shell script, #cli, #커맨드 프롬프트, #git bash, #vim
