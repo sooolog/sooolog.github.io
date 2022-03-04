@@ -8,13 +8,9 @@ featured: true
 ---
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/154784990-1d04c43b-662c-4b21-9b0e-f58d3881d8f9.png">
-</p>
-
-<p align="center">
-.   
-.   
-.   
+.<br>   
+.<br>
+.<br>
 </p>
   
 <p align="center">
