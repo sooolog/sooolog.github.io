@@ -2,22 +2,10 @@
 layout: post
 title:  "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 categories: [ 네트워크 기본 ]
-image: https://user-images.githubusercontent.com/59492312/154784990-1d04c43b-662c-4b21-9b0e-f58d3881d8f9.png
+image: https://user-images.githubusercontent.com/59492312/159111159-77f9a3c5-32ec-4799-999c-38f4db9abc44.png
 description: "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 featured: true
 ---
-
-<p align="center">
-.<br>   
-.<br>
-.<br>
-</p>
-  
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/156134675-b9190eec-3abc-46b7-b9b1-6acd22a4fb50.png">
-</p>
-
-# 👨‍💻 3-way,4-way handshake와 Time_wait 소켓에 대한 개념
 
 * 3-way handshake와 4-way handshake에 대하여
 * Linux kernel 버전확인과 레드핫 계열 리눅스 버전확인
