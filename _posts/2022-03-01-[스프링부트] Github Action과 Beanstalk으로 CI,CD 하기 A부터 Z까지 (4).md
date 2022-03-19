@@ -2,20 +2,8 @@
 layout: post
 title:  "[스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (4)"
 categories: [ 빌드와 배포 ]
-image: https://user-images.githubusercontent.com/59492312/152470883-ec2f15c3-a2b7-4cb7-bf48-4c53c61effd8.png
+image: https://user-images.githubusercontent.com/59492312/159111005-d86c6063-f0fd-4435-bed6-1078dac356c7.png
 ---
-
-<p align="center">
-.<br>   
-.<br>
-.<br>
-</p>
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/152286573-635c26c0-33a9-4413-861a-cbda2822d98a.png">
-</p>
-
-# 📖 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까 (4)
 
 * deploy.yml 작성 
 * 00-makeFiles.config
