@@ -2,20 +2,8 @@
 layout: post
 title:  "[스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (2)"
 categories: [ 빌드와 배포 ]
-image: https://user-images.githubusercontent.com/59492312/151473981-f0504fde-808a-4c1f-9cea-a887f2bb9ace.png
+image: https://user-images.githubusercontent.com/59492312/159110819-c74c7e0f-820d-48a1-9159-9dd717fb454c.png
 ---
-
-<p align="center">
-.<br>   
-.<br>
-.<br>
-</p>
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151309696-7ab7e274-101f-4467-ba73-74c65cc872bf.png">
-</p>
-
-# 📖 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (2)
 
 * Github Action을 위한 deploy.yml작성과 이해
 * bash, shell, git bash, vim, cli, 터미널의 기본개념 훑고가기
