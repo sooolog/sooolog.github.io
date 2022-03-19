@@ -2,20 +2,8 @@
 layout: post
 title:  "[스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (3)"
 categories: [ 빌드와 배포 ]
-image: https://user-images.githubusercontent.com/59492312/151650030-15d1cafa-0f30-4803-8ea7-ecbc60d5a596.png
+image: <img width="751" alt="Frame 3" src="https://user-images.githubusercontent.com/59492312/159111002-5cf463d0-775a-4437-9e48-7252fe82180a.png">
 ---
-
-<p align="center">
-.<br>   
-.<br>
-.<br>
-</p>
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/151650030-15d1cafa-0f30-4803-8ea7-ecbc60d5a596.png">
-</p>
-
-# 📖 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (3)
 
 * 빈스톡 환경 생성
 * IAM 발급
