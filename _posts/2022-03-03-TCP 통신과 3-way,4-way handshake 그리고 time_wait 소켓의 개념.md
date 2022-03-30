@@ -1,15 +1,14 @@
 ---
 layout: post
-title:  "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
+title:  "TCP 통신과 3-way,4-way handshake 그리고 time_wait 소켓의 개념"
 categories: [ 네트워크 기본 ]
-image: https://user-images.githubusercontent.com/59492312/159111159-77f9a3c5-32ec-4799-999c-38f4db9abc44.png
+image: https://user-images.githubusercontent.com/59492312/160762408-e03df6bc-7ab5-4ca7-a46c-f536664da899.png
 description: "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 featured: true
 ---
 
-* 3-way handshake와 4-way handshake에 대하여
-* Linux kernel 버전확인과 레드핫 계열 리눅스 버전확인
-* Time_wait 소켓이 문제가 되는 이유
+* TCP 통신과 3-way handshake와 4-way handshake
+* 내가 사용하는 서버의 기본 time_wait 시간확인
 
 > 모든 코드는 [깃헙](https://github.com/sooolog/dev-spring-springboot)에 작성되어 있습니다.
 
@@ -19,7 +18,7 @@ featured: true
 
 
 
-### 1.네트워크 통신 3 way handshake, 4 way handshake에 대해 알아보자.
+### 1.TCP 통신과 3-way-handshake, 4-way-handshake에 대해 알아보자.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/154784990-1d04c43b-662c-4b21-9b0e-f58d3881d8f9.png">
@@ -33,9 +32,9 @@ TCP는 한번씩 들어봤을거다.TCP(Transmission Control Protocol)는 쉽게
                
 <br>
 
-> **HTTP통신과 TCP통신은 다른게 아닌가요?**         
-> Http통신도 TCP통신을 기반으로 만들어져 있다. 그렇기에 아래에 설명할 3-way handshake, 4-way handshake 과정을
-> TCP통신 뿐만이 아니라, Http통신도 똑같이 적용이된다. 아래에 3-way handshake와 4-way handshake를 보고나면 이해가 더 
+> **HTTP 통신과 TCP 통신은 다른게 아닌가요?**         
+> HTTP 통신도 TCP 통신을 기반으로 만들어져 있다. 그렇기에 아래에 설명할 3-way handshake, 4-way handshake 과정을
+> TCP 통신 뿐만이 아니라, HTTP 통신도 똑같이 거치게 된다. 아래에 3-way handshake와 4-way handshake를 보고나면 이해가 더 
 > 잘 될것이다.    
 > [HTTP통신과 TCP통신](https://hwan-shell.tistory.com/271)
                                                           
@@ -314,97 +313,15 @@ time_wait도 1분으로 생각하고 가도 충분할것이다.
 
 
 
-### 3.time-wait 소켓이 발생한다 했을때 이게 왜 문제가 될까?
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/154788409-5bb4fd57-b393-4b59-b8d0-37ad4783ab36.png">
-</p>
-
-사실 TCP 통신에서 TIME_WAIT 상태의 소켓이 발생하는것은 자연스러운 현상이다.
-하지만, 이게 문제가 되는것은 너무많은 time_wait 상태의 소켓이 생성되어있을 때이다.
-
-어느쪽이든 Client 입장(요청하는 쪽)에선 요청을 보내기 위해서는 커널에서 할당 받은 
-로컬 포트로 소켓 생성을 요청한다. 
-
-<br>
-
-> 위의 3-way handshake나 4-way handshake에서는 클라이언트와 서버단이 마치 유저와 서비스 서버로 나누어 놓았지만, 이해상
-> 이렇게 구분되어지게 설명한것이다. 실제로는 EC2인스턴스가 클라이언트단이 되고 유저들이 서버단이 될 수도 있다. 어떠한 단이 되는지에 대한
-> 기준은 요청을 먼저 하는쪽이 클라이언트단, 받는쪽이 서버단이 되는것이다. 즉, EC2서버에서 먼저 요청을 보내겠다고 하면 EC2서버가 클라이언트단이 되는것이다. 
-> 그 예로,      
-> (1).톰캣서버(WAS)와 DB 연동     
-> (2).톰캣서버(WAS)와 외부 API 연동        
-> (3).Nginx와 톰캣서버(WAS) 연동    
-> 의 경우 (1),(2)는 톰캣서버가 클라이언트단이 되고, (3)에서는 Nginx가 클라이언트단이 되는것이다.   
-> [클라이언트단과 서버단의 개념](https://jojoldu.tistory.com/319)
-
-<br>
-
-그런데, 위 그림과 같이 통신할 때 사용할 포트를 커널에서 할당받을 때 이 포트번호는 고유한
-번호(로컬 포트)를 할당받게 된다. 그리고 이 포트번호로 다시 커널에 소켓생성을 요청하여 생성된 소켓을 사용하여
-TCP통신이 진행되게 된다.
-
-문제는 여기서부터인데, 통신이 완전히 종료되고(여기서는 time_wait이 종료되는것으로 본다.) 소켓이
-커널로 돌아가기전까지는 해당 소켓에 할당된 고유 포트번호를 사용할 수가 없다는 것이다. 만약 time_wait 상태의 소켓이 많아지게 되면
-사용가능한 로컬포트 또한 줄어들게 되고, 끝으로는 모든 로컬포트가 time_wait소켓에 묶여있어 더이상 할당할 수 있는
-로컬포트가 없게되는경우에 새로운 통신을 위한 소켓을 생성할 수 없게된다. 그러면, 더 이상 클라이언트단과 서버단은 서로 통신을
-할 수 없게되는 것이다.
-
-<br>
-
-> 또 한가지 알아야 할것은 이 time_wait 소켓은 클라이언트단이나 서버단이나 연결을 먼저 끊으려고 하는쪽에서
-> 발생한다. 하지만, 통상 클라이언트단에서 먼저 연결을 끊으려고 FIN을 서버단에 보내기에 대부분 클라이언트단에서
-> time_wait 소켓이 발생한다고 볼 수 있다.      
-> [time_wait 소켓의 발생 (1)](https://puzzle-puzzle.tistory.com/entry/TIMEWAIT-%EC%86%8C%EC%BC%93%EC%9D%B4-%EC%84%9C%EB%B9%84%EC%8A%A4%EC%97%90-%EB%AF%B8%EC%B9%98%EB%8A%94-%EC%98%81%ED%96%A5)    
-> [time_wait 소켓의 발생 (2)](https://jojoldu.tistory.com/319)
-
-<br>
-
-> [time_wait 소켓이 문제가 되는 이유](https://jojoldu.tistory.com/319)
-
-<br>
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/156504161-6c477067-119e-43c2-9127-764c9fb963da.png">
-</p>
-
-이해를 돕기위한 실제 예를 보여주도록 하겠다. 필자는 빈스톡과 Nginx를 사용하여 스프링부트 톰캣(내장)을
-연결하여 사용한다.
-
-위의 자료는 실제 Nginx가 클라이언트단이 되고, 서버단은 톰캣(WAS)이 되어서 통신하는 과정에서
-time_wait 소켓이 발생한 목록이다. 자세히 보면, 왼쪽은 127.0.0.1:고유포트번호이고
-오른쪽은 127.0.0.1:8080이다. 왼쪽이 클라이언트단인 Nginx의 소켓 고유 포트번호와 ip주소이고 오른쪽
-127.0.0.1:8080이 스프링부트 어플리케이션이 실행중인 포트번호이다.
-
-해당 time_wait 소켓(클라이언트단의 소켓)이 사용하는 포트번호가 모두 다른것을 볼 수 있다.
-
-<br>
-
-> 양쪽 다 ip주소가 127.0.0.1인 이유는 같은 EC2 인스턴스 내에서 이루어지는 통신이기 때문이다.
-
-<br>
-
-> [Nginx와 내장톰캣의 통신으로 본 ip주소와 포트번호 예시들](https://jojoldu.tistory.com/319)
-
-<br>
-
-여기까지가 네트워크 통신의 기본과 time_wait 소켓의 발생과정 그리고 time_wait 소켓이 왜 오류를 일으키는지에 대해
-알아보았다. 그렇다면, 실제 서비스에서는 이 time_wait를 어떻게 해결할것인지 그 해결방안에 대해서는 실제 필자가 사용하고 있는
-빈스톡과 nginx 그리고 스프링부트를 예로 들어서 '성능 튜닝' 관련 글에 정리해보도록 한다.
-
-<br>
-
-
-
 ### 🚀 추가로,
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/154786799-3d5a6320-20db-4062-be1f-4571df1a84a8.png">
 </p>
 
-앞서,HTTP통신이 TCP통신기반이라 얘기했었다. 하지만, HTTP통신과 TCP통신의 차이점도 분명히 존재한다.
+앞서, HTTP 통신이 TCP 통신기반이라 얘기했었다. 하지만, HTTP 통신과 TCP 통신의 다른점도 분명히 존재한다.
 
-**Http통신**  
+**HTTP 통신**  
 1. 클라이언트가 요청을 보내는 경우에만 Server가 응답하는 단방향 통신이다.
 2. Server로 부터 응답을 받은 후에는 연결이 바로 종료된다.
 3. 요청을 보내 server의 응답을 기다리는 어플리케이션의 개발에 주로 사용된다.
@@ -413,12 +330,6 @@ time_wait 소켓이 발생한 목록이다. 자세히 보면, 왼쪽은 127.0.0.
 1. Server와 Client가 계속 연결을 유지하는 양방향 통신이다.
 2. Server와 Client가 실시간으로 데이터를 주고받는 상황이 필요한 경우에 사용된다.
 3. 실시간 동영상 Streaming이나 온라인 게임등에 자주 사용된다.
-
-<br>
-
-> 만약, 웹서비스에서 리버스 프록시인 Nginx와 로드벨런서를 사용하는 경우, 브라우저 클라이언트단에서
-> 요청을 보낼때는 Http통신을 하고, Nginx에서 이를 받아 WAS로 보낼때는 TCP 소켓(socket)통신을
-> 하게 된다.(또한, WAS와 외부api통신, WAS와 RDS통신 모두 소켓통신이다.)
 
 <br>
 
