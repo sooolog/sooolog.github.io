@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "TCP 통신과 3-way,4-way handshake 그리고 time_wait 소켓의 개념"
-categories: [ 네트워크 기본 ]
+categories: [ 네트워크 ]
 image: https://user-images.githubusercontent.com/59492312/160762408-e03df6bc-7ab5-4ca7-a46c-f536664da899.png
 description: "3-way,4-way handshake와 Time_wait 소켓에 대한 개념"
 featured: true
