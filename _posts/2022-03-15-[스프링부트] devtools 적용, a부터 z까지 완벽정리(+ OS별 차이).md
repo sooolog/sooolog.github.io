@@ -18,7 +18,7 @@ featured: true
 
 
 
-### 1.우선 빠르게 SpringBoot devtools 의존성을 추가해 보도록 하겠다.
+### 1.SpringBoot devtools 의존성을 추가해 보도록 하겠다.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144983726-50030525-fe6d-4a09-a005-cad5e405ca2c.png">
@@ -84,8 +84,6 @@ On frame deactivation:
 이 마지막 설정이 되야 제대로 실시간 업데이트가 되며, classes는 클래스파일들에 대한 업데이트 resources는 정적파일에 대한 업데이트이다. 즉, Update resources와 같은것도 있는데 이것을 클릭하고 저장하면 class파일이 변경되어도 devtools가 정상적으로 작동하지 않는다. 주의 바란다.
 
 > 가끔씩 해당 창에서 On 'Update' actions: 칸이 없는 경우가 있다. 이런경우는 그레이들 프로젝트에 스프링부트 프로젝트를 만들었기에 보이지 않는것이다. 처음에 Springinitializr를 통해 스프링부트 프로젝트를 만들어주어야 해당 칸이 보인다.
-
-<br>
 
 #### 마지막 설정. LiveReload 확장프로그램 추가
 
