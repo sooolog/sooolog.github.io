@@ -14,6 +14,10 @@ featured: true
 
 * * * 
 
+<br>
+
+
+
 ### 1.우선 빠르게 SpringBoot devtools 의존성을 추가해 보도록 하겠다.
 
 <p align="center">
@@ -26,6 +30,10 @@ featured: true
 
 의존성을 추가해주는데,위 첫번째 코드처럼 runtimeOnly로 해주어도 되고 아니면 developmentOnly와 위에 configurations { ~ } 를 함께 적어주어서 의존성을 추가해주어도 된다.
 
+<br>
+
+
+
 ### 2.그 다음은 인텔리제이에서 기타 설정들을 해보겠다.
 
 <p align="center">
@@ -36,6 +44,8 @@ featured: true
 
 > 맥북은 Preferences라 뜨고, 윈도우에서는 Settings로 들어가면 된다.
 
+<br>
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144986984-f938ca88-0018-4013-bb80-40dc4196324a.png">
 </p>
@@ -44,17 +54,23 @@ featured: true
 
 > 윈도우는 Ctrl + shift + a 를 클릭하면 해당 창이 뜬다.
 
+<br>
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144983876-497a5d06-51a4-4f2c-a12c-486df86ae8ac.png">
 </p>
 
 그러면, 이런 창이 나오는데, 당황하지 말고 compiler.automake.allow.when.app.running이라는것을 찾아서 체크해준다. 필자는 이미 체크를 해둔상태라 맨위에 뜨게 되는것이다.
 
+<br>
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144983902-1c5e63c8-7144-44bc-9d44-2d2b00381a7b.png">
 </p>
 
 마지막 설정이다. 맥북과 윈도우 동일하게 Run을 클릭하고 Edit Configurations...를 클릭해보자.
+
+<br>
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144987265-64eaae70-8261-42bf-a28e-60c3455af3a6.png">
@@ -69,9 +85,15 @@ On frame deactivation:
 
 > 가끔씩 해당 창에서 On 'Update' actions: 칸이 없는 경우가 있다. 이런경우는 그레이들 프로젝트에 스프링부트 프로젝트를 만들었기에 보이지 않는것이다. 처음에 Springinitializr를 통해 스프링부트 프로젝트를 만들어주어야 해당 칸이 보인다.
 
+<br>
+
 #### 마지막 설정. LiveReload 확장프로그램 추가
 
 🎈 필자는 크롬에서 바로 리로드가 되는지 확인할것인데, 만약 새로고침없이 프로젝트가 리로드 되자마자 브라우저도 자동 새로고침이 되고싶게하고싶다면 크롬 확장프로그램인 Enable liveReload를 추가해주기만 하면된다.
+
+<br>
+
+
 
 ### 3. 코드 작성
 
@@ -89,6 +111,8 @@ public class devToolsController {
 }
 ```
 Controller하나를 이와같이 작성해준다.
+
+<br>
 
 ~~~html
 <!doctype html>
@@ -111,6 +135,10 @@ Controller하나를 이와같이 작성해준다.
 
 필자는 mustache를 사용하기에 머스테치 템플릿을 사용했다.
 
+<br>
+
+
+
 ### 4. 결과 보기(브라우저)
 
 <p align="center">
@@ -118,6 +146,8 @@ Controller하나를 이와같이 작성해준다.
 </p>
 
 코드 수정 전이며
+
+<br>
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/144987747-91f1e181-47ee-4e6b-a753-abc6beebfa29.png">
@@ -136,6 +166,7 @@ Controller하나를 이와같이 작성해준다.
     }
 ```
 컨트롤러와
+
 ```html
 <div>스프링부트 devtools test 후</div>
     <p>{{test1}}</p>
@@ -153,6 +184,7 @@ Controller하나를 이와같이 작성해준다.
 2. Devtools의 작동원리의 개념에 대한것을 알고싶다면 아래 참조링크를 보도록 하자.   
 [[SpringBoot Devtools 원리]](https://iksflow.tistory.com/57))
 
+<br>
 
 ## 🪁 Reference
 * [스프링부트 Devtools 설정1](https://velog.io/@bread_dd/Spring-Boot-Devtools)      
