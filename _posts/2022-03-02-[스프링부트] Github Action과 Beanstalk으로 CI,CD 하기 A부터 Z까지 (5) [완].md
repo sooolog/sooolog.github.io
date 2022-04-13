@@ -2,7 +2,7 @@
 layout: post
 title:  "[스프링부트] Github Action과 Beanstalk으로 CI,CD 하기 A부터 Z까지 (5) [완]"
 categories: [ 빌드와 배포 ]
-image: https://user-images.githubusercontent.com/59492312/162915206-638c2517-c122-4344-abf5-e8a984dd3aa8.png
+image: https://user-images.githubusercontent.com/59492312/163088078-f5b45b97-edb2-4b24-88ec-7b70c813ff2a.png
 ---
 
 * 리버스 프록시로써 작동하는 Nginx
