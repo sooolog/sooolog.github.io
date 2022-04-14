@@ -2,7 +2,7 @@
 layout: post
 title:  "Nginx gzip 설정을 통한 텍스트 데이터(HTML, CSS, Javascript, JSON..) 속도 테스트"
 categories: [ 속도 테스트 ]
-image: "https://user-images.githubusercontent.com/59492312/163303761-ca860882-d96-4dbb-a3f7-672519c5798c.png"
+image: "https://user-images.githubusercontent.com/59492312/163343790-d47a36a9-2ad4-4bc4-ac2b-b8ed4dda4eef.png"
 ---
 
 * gzip에 대한 개념과 텍스트 데이터
