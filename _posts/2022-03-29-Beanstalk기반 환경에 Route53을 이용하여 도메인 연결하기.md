@@ -2,7 +2,7 @@
 layout: post
 title:  "Beanstalk기반 환경에 Route53을 이용하여 도메인 연결하기"
 categories: [ 도메인연결 ]
-image: https://user-images.githubusercontent.com/59492312/162870779-50740894-d604-4365-b517-6687dad87c07.png
+image: https://user-images.githubusercontent.com/59492312/164390968-341022c7-6e7e-4d8d-a28d-fc8d71835a4b.png
 ---
 
 # 📖 Beanstalk기반 환경에 Route53을 이용하여 도메인 연결하기
