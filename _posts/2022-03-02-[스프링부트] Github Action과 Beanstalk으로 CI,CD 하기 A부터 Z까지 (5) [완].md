@@ -5,8 +5,11 @@ categories: [ 빌드와 배포 ]
 image: https://user-images.githubusercontent.com/59492312/163088078-f5b45b97-edb2-4b24-88ec-7b70c813ff2a.png
 ---
 
+# 📖 [스프링부트] Github Action과 Beanstalk으로 CI/CD 하기 A부터 Z까지 (5) [완]
+
 * 리버스 프록시로써 작동하는 Nginx
-* 빈스톡 환경 배포의 마지막 설정파일 nginx.conf 설정
+* Nginx 설정파일인 nginx.conf 작성
+* 최종 배포시 발생하는 문제들
 
 > 모든 코드는 [깃헙](https://github.com/sooolog/dev-spring-springboot)에 작성되어 있습니다.
 
@@ -160,7 +163,7 @@ nginx.conf에 작성된 코드이다. 이제부터 각 문단이나 중요키워
 위의 코드중에 user, error_log, pid, http, server모두 디렉티브이다. 또한, 디렉티브는 블록(혹은 컨텍스트)디렉티브와
 심플 디렉티브로 나뉜다.
  
-* **심플디렉티브** : 세미콜론(;)으로 끝나는 디렉티브이다. 위의 디렉티브중 user,error_log,pid가 심플디렉티브이다.
+* **심플 디렉티브** : 세미콜론(;)으로 끝나는 디렉티브이다. 위의 디렉티브중 user,error_log,pid가 심플디렉티브이다.
  
 * **블록 디렉티브** : 세미콜론 대신에 중괄호({})로 끝난다. 또한, 블록 디렉티브는 중괄호 안에 다른 디렉티브를 가질 수 있다.
 위의 디렉티브중 http, server가 블록 디렉티브이다..
@@ -185,7 +188,7 @@ nginx.conf파일은 기본적으로 /etc/nginx/ 폴더안에 위치하게 된다
 
 즉, 조금 더 풀어서 말하자면, 우리가 EC2인스턴스에 ssh로 접속하게 되면 제일 먼저 홈디렉토리에서 시작하게 된다.
 그곳에서 명령어 cd /etc/nginx로 들어가보면 각종 nginx 설정파일들과 폴더들이 있고 거기에 nginx.conf파일도 있는것이다.
-그 중에 nginx.conf파일이 가장 주요한 설정파일이다.
+그 중에 nginx.conf 파일이 가장 주요한 설정파일이다.
 
 <br>
 
@@ -337,7 +340,7 @@ http {
 }
 ```
 
-http 블록은 웹 서버에 대한 동작을 설정하는 영역으로, server, location 블록을 포함한다.
+http 블록은 Nginx 서버에 대한 동작을 설정하는 영역으로, server, location 블록을 포함한다.
 또한, 여기서 선언된 값은 하위블록에 상속된다.
 
 <br>
@@ -403,40 +406,62 @@ log_format은 nginx의 access 로그의 형식을 지정해준다.
   }
 ```
 
-이제는 upstream 블록 디렉티브를 보겠다.   
-@@@@@@@@@@@@@@@@
- 
-upstream은 origin은 WAS 즉, 웹 어플리케이션 서버를 의미한다. nginx와 연결한 웹 어플리케이션 서버를 지정하는데
-사용된다. 하위에 있는 server 지시어는 연결할 웹 어플리케이션 서버의 'IP주소(호스트주소):포트'로 지정해준다.
+이제는 upstream 블록 디렉티브와 그 안의 다른 디렉티브들인 server, keepalive에 대해서 알아보겠다.   
 
-upstream은 여러개를 만들 수 있으며,a
+upstream 블록 지시어는 origin 서버(server)를 가리키는데, 위에서는 WAS를 가리키고 있다. upstream 블록 지시어 안에 
+심플 지시어인 server 값으로 origin 서버(server)의 호스트명(혹은 ip주소)과 포트를 적어주어서 설정하게 된다. 이렇게 설정해주어서
+origin 서버(server)를 가리키는 upstream 블록 지시어를 사용하는 이유는 후에 nginx로 HTTP 요청(Request)이 들어오게 되면 
+우리가 설정한 upstream의 origin 서버(server)로 요청을 다시 보내기 위함이다. 
 
-<br>
+upstream 블록 지시어까지는 origin 서버(server)를 설정하기 위함이고, Nginx으로 들어오는 HTTP 요청(Request)을
+다시 origin server(여기서는 WAS)로 보내는 역활(=리버스 프록시)을 하는 지시어는 뒤에서 location 블록 디렉티브안에 있는 
+proxy_pass 심플 디렉티브에서 더 자세히 보도록 하겠다.
 
-> nginx서버를 가리키는것은 downstream에 해당한다.
-
-<br>
-
-> upstream 지시어 안에, server 지시어를 여러개 적어서 로드벨런싱으로써 작용하게 할 수도 있다.    
-> upstream test{    
->         server 호스트주소:포트    
->         server 호스트주소:포트    
-> }    
-> 와 같이 써주며, 순서대로 요청을 돌아가며 처리해주는 라운드로빈 방식과 서버마다 가중치를 주고 가중ㅊ치가 높은곳 부터 부하를 보내는 가중치
-> 라운드 로빈 방식이 있는데, 다른 설정이 없다면 라운드 로빈 방식으로 작동한다.       
-> [엔진엑스로 로드벨런싱 이용하기](https://cantcoding.tistory.com/77)
+다음으로 upstream 다음에 명칭을 적게되는데 위에서는 springboot라고 적었지만, 얼마든지 내가 해당 origin 서버(server)를
+표현하고자 하는 명칭을 적어주면 된다. 이 부분이 뒤에 나올 proxy_pass에서 사용하게 된다.
 
 <br>
 
-> [upstream 지시어 (1)](https://narup.tistory.com/209)
-> 
+> origin 서버는 하나의 컴퓨터로써 들어오는 요청에 대해 응답할 수 있게 구조화된 서버를 의미한다. 여기서는
+> WAS가 origin 서버이다.     
+> [origin server의 개념](https://www.cdnetworks.com/ko/knowledge-center/what-is-origin-server/)
 
+<br>
 
-/var/log/nginx/access.log이거 형식 있었는데 main;
-이거 서버마다 로그 이름 다르게 하는거 있었다.
+> upstream의 한국어 의미는 상류이고, downstream의 한국어 의미는 하류이다. 물이 흘러 내려가서 받는 곳이 하류(downstream)이고
+> 윗쪽에서 물을 흘러 내려보내는 곳이 상류(upstream)이다. 물을 데이터 패킷으로 비유 하자면, 네트워크에서 데이터를 보내는 쪽 즉, 흘러 보내는
+> 쪽이 상류(upstream)이고, 데이터 패킷을 받는쪽은 하류(downstream)가 되는것이다. 위의 upstream 지시어가 가리키는 origin 서버(server)는
+> upstream이 되고 우리는 WAS로 지정했기에 WAS가 upstream이 되는것이다.('상류'로써 들어오는 요청에 응답을 하며 데이터를 내보내는 쪽이기때문) 
+> Nginx는 이 경우 WAS로 부터 데이터를 받는 쪽이니 downstream이 되는것이다.        
+> [upstream 지시어의 의미](https://developer88.tistory.com/299)     
 
-@@@@@@@@@@@@@@@@
+<br>
 
+> upstream 블록 지시어 안에 있는 심플 지시어 server는 아래에서 볼 server 블록 지시어와는 다른것이다.
+> 지시어의 명칭은 같지만 하나는 심플 지시어이고 다른 하나는 블록 지시어이다.
+
+<br>
+
+> [upstream 지시어와 server 지시어의 개념과 역활 (1)](https://developer88.tistory.com/299)      
+> [upstream 지시어와 server 지시어의 개념과 역활 (2)](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#upstream)      
+> [upstream 지시어와 server 지시어의 개념과 역활 (3)](https://juneyr.dev/nginx-basics)      
+> [upstream 지시어와 server 지시어의 개념과 역활 (4)](https://hyeo-noo.tistory.com/205)     
+
+<br>
+
+마지막으로 keepalive는 해당 origin 서버로 통신을 할 때 캐싱할 커넥션 수를 의미한다.
+조금 더 쉽게 말하자면 keepalive기능을 사용하는데 몇개의 커넥션들에 대해 keepalive를 사용할지
+개수를 설정하는 지시어다.
+
+만약, 위에 처럼 keepalive 1024;이면 keepalive를 사용할 커넥션 수를 1024개로 설정한다는
+의미이다. keepalive 값을 설정했는데 만약 요청이 계속해서 들어오고 keepalive가 적용된 커넥션 수가
+설정 값에 다다르게 되면 초과되는 요청에 대해서는 LRU(Least Recently Used)에 따라서 가장 최근에
+사용되지않은 keepalive 커넥션의 소켓 연결을 닫는다.
+
+<br>
+
+> [upstream 지시어의 keepalive 하위 지시어 (1)](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive)    
+> [upstream 지시어의 keepalive 하위 지시어 (2)](https://fuirosun.tistory.com/entry/nginx-keepalive-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0)    
 
 <br>
 
@@ -602,10 +627,12 @@ access_log 지시어 값의 맨뒤 main은 이 전 log_format  main
 
       access_log    /var/log/nginx/access.log main;
 
+      client_max_body_size  10m;
       client_header_timeout 60;
       client_body_timeout   60;
       keepalive_timeout     60;
-      gzip                  off;
+      server_tokens         off;
+      gzip                  on;
       gzip_comp_level       4;
 
       # Include the Elastic Beanstalk generated locations
@@ -615,17 +642,41 @@ access_log 지시어 값의 맨뒤 main은 이 전 log_format  main
 
 나머지 코드들을 정리해 보도록 하겠다.
 
+* client_max_body_size : 클라이언트가 보내는 HTTP 요청(Request)에서 body 사이즈의 크기를 제한하는 것이다.
+
 * client_header_timeout : 클라이언트와 서버가 연결된 후 지정된 시간안에 클라이언트가 온전한 헤더 전체를
-  전송하지 않으면 해당 요청은 제거되고, 408(Request Time-out)로 끝난다. 디폴트 값은 60초다.
+  전송하지 않으면 해당 요청은 제거되고, 408(Request Time-out) 에러로 끝난다. 디폴트 값은 60초다.
 
-* client_body_timeout : 클라이언트가 서버로 데이터를 보냈을때 즉, 요청(Request) body를 보냈을때, 
+* client_body_timeout : 클라이언트가 서버로 데이터를 보냈을때 즉, 요청(Request) body를 보냈을때
+  request body 전체 전송 시간에 대한 것은 제외한, 두개의 연속적인 읽기 작업 사이의 timeout 시간이다.
+  디폴트 값은 60초이며, 만약 클라이언트가 이 시간안에 아무것도 전송하지 않는다면 요청(request)은 제거되고
+  408 에러를 발생시킨다.
 
-* keepalive_timeout : 
+* keepalive_timeout : HTTP 요청(Request)을 처리한 후에 연결을 끊지말고 유지하라는 KeepAlive 모드가 있다.
+  이 keepalive 상태 즉, 연결을 끊지않고 유지하는 시간 값을 입력하면 된다. 디폴트값은 75s(75초)이며 일부 브라우저 에서는
+  60s(60초)까지만 유지하기에 60초로 설정이 된다.
+
+* server_tokens : 에러페이지나 아니면 서버의 응답(Response) 헤더에 어떤 nginx의 버전이 쓰였는지를
+  명시하거나 아니면 명시하지 않을지를 설정하는 부분이다. 디폴트값은 on이다. Nginx의 버전이 노출되면 이를 이용하여
+  악의적인 공격이 들어올 수 있어 보안상 off값으로 명시해주는게 좋다.
 
 * gzip : HTTP 응답(Response)에서 데이터를 클라이언트에게 보낼 때 압축해서 보낼지 아니면 그냥
   보낼지 설정할 수 있다.
 
 * gzip_comp_level : gzip의 압축기능의 압축률을 지정하는 설정이다. 
+
+이 외에도 성능과 속도와 관련된 디렉티브들이 많이 있다. 기본적인 세팅은 이대로 진행하며, 추가적인 디렉티브의 설정과 개념들에서는 다시한번 정리하도록 하겠다.
+
+<br>
+
+> client_max_body_size는 위에서도 보았듯이 클라이언트가 보내는 HTTP 요청(Request)의 body 사이즈 크기제한을 설정하는 디렉티브이다.
+> 실제로 실 서비스에서 사용할 때는 여러 상황들을 고려하여 값을 지정해야 한다. 우선 여기서는 10m(=10mb)으로 지정하도록 하겠다. 
+> 따로 디렉티브값을 명시해 주지않으면 디폴트값은 1m(1mb)이다. 만약 클라이언트에서 요청을 보낼 때 해당 디렉티브 값을 넘어서 요청을 보내면,
+> 413 에러가 발생하며 브라우저에서는 이에 대한 오류를 명확하게 보여주지 않으니 미리 인지하고 설정값을 지정하여야 한다.(request의 Content-Length 헤더값은
+> client_max_body_size에 설정된 값을 초과할 수 없다)     
+> [Nginx의 client_max_body_size 디렉티브 (1)](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)    
+> [Nginx의 client_max_body_size 디렉티브 (2)](https://velog.io/@jongwoo328/Nginx-request-size-%EB%B3%80%EA%B2%BD%ED%95%98%EA%B8%B0)     
+> [Nginx의 client_max_body_size 디렉티브 (3)](https://ohdowon064.tistory.com/293)
 
 <br>
 
@@ -635,52 +686,10 @@ access_log 지시어 값의 맨뒤 main은 이 전 log_format  main
 
 <br>
 
-> []()    
-> []()    
-> []()
-
-<br>
-
-정리하자면,      
-그렇기에, server블록은 하나의 웺사이트를 선언하는데 사용되며, server 블록이 여러개이면, 한대의 머신(호스트)에 여러 웹사이트를 서빙할 수
-있게되는것이다.(server_name으로 여러 도메인을 지정할 수 있기때문) 여기서 호스트란 EC2로 보아도 되고, Nginx 웹서버로 볼 수도 있다.
-
-이렇게, 실제로 호스트는 한대지만, 여러 웹사이트를 서빙하기에 마치 가상으로 호스트가 여러개 존재하는 것처럼
-동작하게 되기에 이런 개념을 가상 호스트라고 한다. server 블록 자체가 가상 호스팅을 가능하게 하는것이다. 
-
-<br>
-
-> [server 블록이란 (1)](https://prohannah.tistory.com/136)    
-> [server 블록이란 (2)](https://juneyr.dev/nginx-basics)
-
-<br>aaaaaaaaaaa
-
-다음, access log가 어디 저장될지 보이는건데, 이는 이 서버에 해당하는 거에 대해서만
-로그를 남긴다. 이것도 상속의 개념aaa
-
-<br>
-
-server 블록 또한 여러개 만들 수 있는데, 그렇게되면 한대의 머신(=호스트)에
-여러 웹사이트를 서빙할 수 있게 되어 실제로 호스트는 한대지만, 가상으로 마치 호스트가 여러개 존재하는 것처럼 동작하게 할 수 있기에 가상 호스트라고 한다.
-
-조금 더 쉽게 말하자면, http 컨텐스트 내에 아래와 같이    
-
-그리고 http 블록도 server, location이런거 끝내고 개념 한번 더 정리
-
-```conf
-server {
-    server_name test123.com
-}
-
-server {
-    server_name test456.com
-}
-```
-
-<br>
-
-> 위에는 적혀져 있지 않지만, server_name이라는 지시어를 server 컨텐스트내에 사용할 수 있다.
-> 
+> [nginx.conf의 디렉티브들에 관하여 (1)](https://nginx.org/en/docs/http/ngx_http_core_module.html)    
+> [nginx.conf의 디렉티브들에 관하여 (2)](https://yangbongsoo.tistory.com/12)    
+> [nginx.conf의 디렉티브들에 관하여 (3)](https://intrepidgeeks.com/tutorial/nginx-timeout-setting)     
+> [nginx.conf의 server_tokens와 보안](https://goodgid.github.io/Nginx-Option-Server-Tokens/)
 
 <br>
 
@@ -697,28 +706,154 @@ server {
       }
 ```
 
-마지막으로, location 블록 지시어를 보겠다.
-a
+마지막으로 location 블록 지시어와 location 블록 지시어안의 심플 지시어들을 보도록 하겠다.
+
+location은 server 블록 지시어의 하위 블록 지시어로 특정 url을 처리하는 지시어다.
+조금 더 쉽게 말하자면, server 블록 지시어는 www.도메인A.com, 도메인A.com, 도메인A.net처럼 최상위 도메인이나 아니면
+하위도메인 혹은 도메인B.com과 같이 아예 도메인 이름이 다른 경우를 모두 식별하여 HTTP 요청(Request)에 맞게 연결하지만
+location은 server로 받아온 도메인에서 특정 세부 url을 처리하는데 사용한다. 예를들면 도메인A.com/one, 도메인A.com/two
+로 요청이 들어오면 각각 다른 origin서버나 혹은 정적파일을 제공해줄 수 있는것이다. 예를 보면 더 정확하게 알 수 있다.
 
 <br>
 
-아니 근데, 이거하고 디렉티브니 이런 기본 개념도 정리해야해, 블럭이니
+```conf
+location / {
+    proxy_pass          http://springboot;
+    proxy_http_version  1.1;
+    proxy_set_header    Connection          $connection_upgrade;
+    proxy_set_header    Upgrade             $http_upgrade;
 
-(3). http 블록 : 웹서버에 대한 동작을 설정하는 영역으로 server블록과 location블록 그리고 upstream블록의 루트 블록이다. 여기서 선언된
-값은 하위블록에 상속되어, 서버의 기본값이 된다.
+    proxy_set_header    Host                $host;
+    proxy_set_header    X-Real-IP           $remote_addr;
+    proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+  }    
 
-(4). server블록과 location블록 : server블록은 하나의 웹사이트를 선언하는데 사용되며, 가상 호스팅의 개념이다. location블록은 server블록 내에서
-특정 URL을 처리하는 방법을 정의한다. 
+location /one {
+    root /home/deploy/main
+    index index.html
+  }
 
-(5). upstream블록 : origin서버라고도 하며, 여기서는 WAS를 의미한다. nginx는 downstream에 해당한다.
+location /two
+    return 200;
+}
+```
 
+이처럼, server 블록지시어안에 location 블록 지시어를 여러개 지정할 수 있으며
+만약 server 블록이 도메인A.com 요청을 받아들이면 위의 location /로 매칭이 되고 도메인A.com/one 요청이 들어와
+받아들이면 location /one으로 매칭이 되는것이다.
+
+만약 위와같이 설정하였는데 요청이 도메인A.com/one/main으로 온다면 Nginx는 그 중 가장 길게 매칭이 되는
+location 블록과 연결시킨다. 도메인A.com/one/main이면 location /one과 가장 길게 매칭이되니 location /one으로
+연결이 되는것이다.
 
 <br>
 
-> 위의 nginx.conf설정 그대로 빈스톡 환경 구성의 소프트웨어 환경 속성에서 PORT로 8080 혹은 
-> 5000으로 설정하고 해도 정상적으로 작동한다.(특히, PORT 5000은 빈스톡 환경을 생성하자마자 자동으로 소프트웨어
-> 환경 속성에 적혀져있는데, 위의 nginx.conf설정이 담긴 프로젝트를 배포하면 해당 환경 속성 PORT 5000이 없어진다.)      
-> [PORT 8080 적용](https://stackoverflow.com/questions/54612962/502-bad-gateway-elastic-beanstalk-spring-boot)
+> 위에서 location /은 우리가 작성한 upstream 블록지시어와 매칭시켜주어 origin 서버인 WAS로 보내주기
+> 때문에 Nginx를 리버스 프록시로써 사용할 수 있다. location /one의 경우에는 요청이 들어오면 정적자료를 반환하기에
+> 이 경우는 Nginx가 웹 서버로써 작동하는 거다. 마지막으로 location /two는 status code(상태코드)를 반환하는 것이다.   
+
+<br>
+
+> Nginx는 정적파일을 서빙하는 웹 서버로써 사용하거나 혹은 리버스 프록시로써 사용할 수 있는데, 이곳에서는 리버스 프록시로써만 Nginx를
+> 사용하려 한다.        
+> [웹 서버 혹은 리버스 프록시로써의 Nginx](https://juneyr.dev/nginx-basics)
+
+<br>
+
+> [location 지시어에 관하여 (1)](https://juneyr.dev/nginx-basics)     
+> [location 지시어에 관하여 (2)](https://narup.tistory.com/209)     
+> [location 지시어에 관하여 (3)](https://architectophile.tistory.com/11)     
+
+<br>
+
+```conf
+location / {
+    proxy_pass          http://springboot;
+    proxy_http_version  1.1;
+    proxy_set_header    Connection          $connection_upgrade;
+    proxy_set_header    Upgrade             $http_upgrade;
+
+    proxy_set_header    Host                $host;
+    proxy_set_header    X-Real-IP           $remote_addr;
+    proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+  }  
+```
+
+우리는 리버스 프록시로써 작동하는 이 코드들에 대해 마지막으로 보도록 하겠다.
+
+* proxy_pass : HTTP 요청(Request)이 location과 매칭되었을때 해당 요청을 어디로 보낼지 나타내는 지시어이다.
+  값으로는 IP주소:포트번호로 설정하거나, 도메인명 아니면 우리가 위에서 설정한 upstream의 명칭을 가져다가 사용할 수 있다. 위처럼
+  http://springboot로 적어주면 이는 127.0.0.1:8080을 의미하게 된다. 또한, http:// 혹은 https://를 같이 작성하여
+  어느 규약을 사용할것인지 알려준다.(작성해주지 않으면 EC2로 배포가 되지 않는다.)
+
+* proxy_http_version  : 디폴트 값은 1.0이다. keepalive 지시어를 사용하려면 버전 1.1을 사용하여야 한다.
+
+* proxy_set_header Host : Nginx에서 proxy_pass로 요청이 넘어갈때 헤더값들이 이전 클라이언트가 보낸 HTTP 요청(Request)의 헤더 값들이 그대로 상속되어서 넘어가게 된다.
+  하지만, proxy_set_header Host와 proxy_set_header Connection는 상속된 값이 아니라 디폴트값으로 재설정이 되어서 Nginx에서 origin 서버로 보내지는데
+  그때의 값은 proxy_set_header Host  $proxy_host; 와 proxy_set_header Connection close; 이다. 하지만, proxy_set_header Host  $proxy_host;
+  의 경우 클라이언트가 보낸 요청의 헤더에서 $proxy_host와 일치하는 항목이 없으면 빈값으로 보내지게 되고 그렇게 되면 오류가 발생하게 된다. 그렇기에 
+  proxy_set_header Host  $host; 와 같이 작성하여 제대로 된 Host값이 헤더에 담아져서 보내지게 해야한다.
+  
+* proxy_set_header Connection : 해당 지시어는 upstream 지시어를 사용하기 위한것이기 때문에 
+  proxy_set_header Connection  $connection_upgrade; 로 다시 명시해주어야 한다.
+  
+* proxy_set_header X-Real-IP : 실제 클라이언트의 IP를 헤더의 X-Real-IP에 값으로 넣어서 전송시킨다.
+  조작이 불가능하고, 여러 프록시 서버를 거치더라도 실제 처음 요청을 한 클라이언트의 ip주소만을 담고있다.
+
+* proxy_set_header X-Forwarded-For : 이 또한 X-Forwarded-For에 클라이언트 IP 주소를 넣어서 전송시킨다.
+  다만, 이전에 프록시 서버를 거쳐서 온 요청이라면 처음 요청을 한 클라이언트가 아닌 바로 전 프록시 서버의 ip주소가 담아지게 된다.
+  또한, 이 헤더값은 조작이 가능하기에 보통 proxy_set_header X-Real-IP와 proxy_set_header X-Forwarded-For를 같이
+  작성하여 사용한다.
+
+* proxy_set_header Upgrade : 이는 upgrade 기능을 사용함으로써 HTTP에서 웹소켓으로 커넥션을 업그레이드 시켜준다.
+  이는 나중에 웹소켓을 사용하게 되는 경우에 다시 보도록 하자.
+
+<br>
+
+> 한가지 의문점이 들수도 있다. 왜 여기서는 굳이 proxy_pass의 값으로 ip주소:포트번호를 쓰지 않고 upstream의
+> 명칭을 쓰냐는것인데, 이렇게 upstream 블록 지시어를 사용하게 되면, keepalive 심플 지시어같은 추가적인 설정을 할 수 있기
+> 때문에 사용을 한다.
+
+<br>
+
+> Nginx를 프록시로 앞단에 두고 Tomcat을 뒷단에 두면, 별도 설정 없이는 톰캣(WAS)에서는
+> 클라이언트 IP를 알 수가 없다. 그렇기에 proxy_set_header X-Real-IP와 proxy_set_header X-Forwarded-For
+> 를 사용해서 클라이언트의 ip주소를 확인한다.     
+> [X-Real-IP와 X-Forwarded-For를 사용하는 이유](https://sg-choi.tistory.com/540)
+
+<br>
+
+> [proxy 지시어에 관하여 (1)](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass)    
+> [proxy 지시어에 관하여 (2)](https://dev-jwblog.tistory.com/42)    
+> [proxy 지시어에 관하여 (3)](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_http_version)    
+> [proxy 지시어에 관하여 (4)](https://developer88.tistory.com/299)    
+> [proxy 지시어에 관하여 (5)](https://velog.io/@csk917work/Nginx-%EC%84%9C%EB%B2%84-%EC%84%A4%EC%A0%95)    
+> [proxy 지시어에 관하여 (6)](https://sg-choi.tistory.com/540)       
+> [proxy 지시어에 관하여 (7)](https://dev-gorany.tistory.com/330)     
+
+<br>
+
+정리하자면 server블록은 하나의 웹사이트(도메인)를 선언하는데 사용되며, server 블록이 여러개면
+한대의 호스트에 여러 웹사이트(도메인)를 서빙할 수 있게되는것이다.(server_name으로 여러 도메인을 지정할 수 있기때문)
+
+이렇게, 실제로 호스트는 한대지만, server 블록을 여러개 만들어 설정하게되면, 하나의 호스트에
+여러 웹사이트(도메인)를 서빙할 수 있게 되어, 마치 가상으로 호스트가 여러개 존재하는 것처럼 동작하기에
+이를 가상 호스트라고 한다. server 블록 자체가 가상 호스팅을 가능하게 하는것이다.
+
+location의 경우에는 server 블록 지시어가 받아들인 도메인에 대해 더욱 세부적으로 나누어서
+매칭을 해주고 Nginx를 리버스 프록시로써 작동시킬지 아니면 웹 서버로써 활용할지를 결정해준다.
+
+<br>
+
+> 여기서 호스트란 IP를 가지고 있는 양방향 통신이 가능한 컴퓨터를 의미한다. 조금 더 정확하게 얘기하자면
+> 네트워크에 연결된 모든 종류의 장치를 노드(node)라고 하는데, 노드중에서도 네트워크 주소(IP)가 할당된 것을
+> 호스트(host)라고 한다.    
+> [호스트(host)란 무엇인가](https://m.blog.naver.com/jysaa5/221736421275)         
+
+<br>
+
+> [server 블록이란 (1)](https://prohannah.tistory.com/136)    
+> [server 블록이란 (2)](https://juneyr.dev/nginx-basics)    
 
 <br>
 
@@ -753,24 +888,10 @@ http {
     server 127.0.0.1:8080;
     keepalive 1024;
   }
-  server {
-      listen 80;
-      server_name celebmine.net www.celebmine.net;
-      return 301 http://celebmine.com$request_uri;
-  }
-
-  server {
-      listen 80;
-      server_name celebmine.co.kr www.celebmine.co.kr;
-      return 301 http://celebmine.com$request_uri;
-  }
 
   server {
       listen        80 default_server;
-
-      if ($host = www.celebmine.com) {
-          return 301 http://celebmine.com$request_uri;
-      }
+      listen        [::]:80 default_server;
 
       location / {
           proxy_pass          http://springboot;
@@ -785,10 +906,12 @@ http {
 
       access_log    /var/log/nginx/access.log main;
 
+      client_max_body_size  10m;
       client_header_timeout 60;
       client_body_timeout   60;
       keepalive_timeout     60;
-      gzip                  off;
+      server_tokens         off;
+      gzip                  on;
       gzip_comp_level       4;
 
       # Include the Elastic Beanstalk generated locations
@@ -797,28 +920,66 @@ http {
 }
 ```
 
-마지막으로 정리된 nginx.conf파일을 보자면 위와같이 적어주면 된다.
+마지막으로 정리된 nginx.conf 파일의 코드들이다.
 
-<br>
-
-#### 🪁 Reference
-* 참조링크 : []()
-* 참조링크 : []()
+이제 깃헙으로 push를 진행하게 되면, 정상적으로 배포가 진행되게 된다.
 
 <br>
 
 
 
-### 3. server_tokens off 로 버전정보 노출안되게해서 보안 up
+### 3. 스프링부트 최종 배포시 발생하는 문제들
+
+```java
+@Controller
+public class MainController {
+
+    @GetMapping("/hi1")
+    public String main1() throws Exception{
+        return "/main";
+    }
+
+    @GetMapping("/hi2")
+    public String main2() throws Exception{
+        return "main";
+    }
+}
+```
+
+첫번째로, 위를 보면 @Controller 클래스의 코드를 보면 main1 메서드는
+반환값이 "/main"이고 main2 메서드는 반환값이 "main"이다. 스프링부트를 로컬로
+실행시키고 크롬에서 접속하면 두 메서드 모두 정상적으로 작동한다. 하지만, 실제 빈스톡과 Nginx를 사용하여
+EC2로 배포시키면 크롬에서 "도메인/hi1"로 접속시 정상적으로 맵핑이 이루어지고 결과값이 나오지만
+"도메인/hi2"로 접속하면 404 에러가 발생한다. 에러가 발생하는 이유는 해당 요청 도메인에 대해
+컨트롤러에서 맵핑은 되지만 return 값이 정상적으로 전달되지 않기 때문이다.
+
+<br>
+
+```java
+@RestController
+public class MainRestController {
+    
+    @GetMapping("/hi3")
+    public String main3() throws Exception{
+        return "test(테스트)";
+    }
+}
+```
+
+두번째로는 처음 빈스톡을 사용하여 스프링부트 프로젝트를 EC2에 배포할때
+한개라도 URL이든 맵핑되고 정상적으로 반환값이 존재하는 컨트롤러가 있어야 한다.
+즉, 조금 더 쉽게 설명하자면 위에서 설명한대로 "도메인/hi1"에 대해서는 정상적으로
+컨트롤러에서 맵핑이되고 값이 반환이 되는데 이러한것 없이 값이 정상적으로 반환되지않는
+"main2" 메서드만 존재한다거나 아니면 적어도 RestController를 이용하여 문자열 반환 컨트롤러 메서드가
+1개라도 존재하지 않는다면 배포를 진행할 때 Fail이 발생하게 된다. 그렇기에, 처음에 테스트를 할 때
+컨트롤러의 경우 정상적으로 return값을 설정했는지 그게 아니라면 RestController를 이용하여
+문자열이라도 출력하게 했는지를 체크해야 정상적으로 EC2에 배포되는것을 볼 수 있다.
+
+<br>
 
 
-1.아래, port 5000이랑, server_sport 5000이랑은 달랐었다. 이거 체크하자.
-2.그리고 nginx가 리버스 프록시이면서 웹서버이다 ? 라는것도 정리하
 
-
-
-
-### 🚀 추가로
+### 🚀 추가로,
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/152488115-f6e4b0d7-2953-4d84-ac7e-e122c588f229.png">
@@ -856,7 +1017,16 @@ server:
 
 > 그런데, properties나 yml설정파일을 사용하는것이나, 빈스톡 환경 구성에서 직접 SERVER_PORT를 5000으로 잡아주는 방식은
 > 어디까지나, 위에 작성한 nginx.conf파일처럼 포트를 직접 설정해주지 않았을 때 이야기다. nginx.conf 파일도 그대로 사용하면서 바로 위의
-> 설정들도 함께 사용하지 말길 바란다.
+> 설정들도 함께 사용하면 안된다.
+
+<br>
+
+> 추가로, 스프링부트 설정파일에서 어플리케이션 실행 포트를 설정해주는 것외에 빈스톡 환경의 추가 옵션 구성에서
+> 소프트웨어 편집을 열고 PORT로 8080 설정을 해주는 방법이 있다. 이는 Nginx가 가리키는 포트 지정이 아닌 스프링부트
+> 어플리케이션이 실행되는 포트를 지정하는 설정이다.(PORT 5000은 빈스톡 환경을 생성하자마자 자동으로 소프트웨어 환경 속성에 
+> 적혀져있기도 하다.)          
+> [빈스톡 환경 구성 PORT 8080 설정 (1)](https://stackoverflow.com/questions/54612962/502-bad-gateway-elastic-beanstalk-spring-boot)     
+> [빈스톡 환경 구성 PORT 8080 설정 (2)](https://stackguides.com/questions/54612962/502-bad-gateway-elastic-beanstalk-spring-boot)
 
 <br>
 
@@ -867,3 +1037,7 @@ server:
 * 참조링크 : [Nginx 포트 5000 그대로 사용하는 방법 (3)](https://wky.kr/6)
 
 <br>
+
+
+
+태그 : #Nginx, #Reverse Proxy, #리버스 프록시, #5000port, #simple directive, #block directive, #nginx.conf, #mapping error
