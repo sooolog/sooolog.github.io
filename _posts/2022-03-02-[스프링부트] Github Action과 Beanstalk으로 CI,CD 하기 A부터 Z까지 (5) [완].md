@@ -157,13 +157,9 @@ nginx.conf에 작성된 코드이다. 이제부터 각 문단이나 중요키워
 * **블록 디렉티브** : 세미콜론 대신에 중괄호({})로 끝난다. 또한, 블록 디렉티브는 중괄호 안에 다른 디렉티브를 가질 수 있다.
 위의 디렉티브중 http, server가 블록 디렉티브이다..
 
-<br>
-
 > 블록은 컨텍스트라고도 불린다. 그렇기에 컨텍스트안에는 다른 디렉티브들이 있을 수 있는데, user, error_log, pid처럼
 > 다른 컨텍스트에 속해있지않은 디렉티브들을 메인 컨텍스트안에 있는것으로 보며, server디렉티브는 http 컨텍스트안에
 > 있는것으로 보면 된다.
-
-<br>
 
 > [심플 디렉티브와 블록(컨텍스트) 디렉티브 (1)](https://kscory.com/dev/nginx/install)      
 > [심플 디렉티브와 블록(컨텍스트) 디렉티브 (2)](https://architectophile.tistory.com/12)
@@ -179,16 +175,12 @@ nginx.conf파일은 기본적으로 /etc/nginx/ 폴더안에 위치하게 된다
 그곳에서 명령어 cd /etc/nginx로 들어가보면 각종 nginx 설정파일들과 폴더들이 있고 거기에 nginx.conf파일도 있는것이다.
 그 중에 nginx.conf 파일이 가장 주요한 설정파일이다.
 
-<br>
-
 > 루트 디렉토리란, 최상위 디렉토리로 모든 디렉토리들의 시작점을 의미한다. 루트 디렉토리를 '/'로 표시한다.
 > 홈 디렉토리란, '\~' 로 물결모양의 디렉토리명으로 표시된다. 통상 EC2에 ssh로 접속하면 시작하는 위치이다. 이
 > 디렉토리는 최상위 디렉토리 '/' 하위의 home디렉토리 안에 사용자 디렉토리를 의미하며, ec2인스턴스는 단일 인스턴스이건
 > 빈스톡을 이용한 인스턴스이건 ec2-user로 디렉토리명이 지정되어있다. 실제로 해당 홈 디렉토리를 들어가보면 디렉토리가
 > '\~' 로 표시된것을 알 수 있다.    
 > [루트 디렉토리 '/'와 홈 디렉토리'~'](https://dana-study-log.tistory.com/entry/Linux-%EB%A6%AC%EB%88%85%EC%8A%A4-%ED%8C%8C%EC%9D%BC-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B5%AC%EC%A1%B0-%EB%A3%A8%ED%8A%B8-%EB%94%94%EB%A0%89%ED%86%A0%EB%A6%AC-%ED%99%88-%EB%94%94%EB%A0%89%ED%86%A0%EB%A6%AC)
-
-<br>
 
 > [nginx.conf 파일의 위치 (1)](https://kscory.com/dev/nginx/install)      
 > [nginx.conf 파일의 위치 (2)](https://architectophile.tistory.com/12)
@@ -207,8 +199,6 @@ worker_rlimit_nofile    33282;
 
 (2). **error_log** : nginx에서 일어나는 에러 로그파일이 존재하는 곳이다. warn은 로그 레벨을 의미하며, 해당 로그레벨 이상만 기록한다. error로 변경할 수도 있다.
 
-<br>
-
 > 우리가 빈스톡으로 배포한 ec2인스턴스에 ssh접속하여 vim /var/log/nginx/error.log를 하면 nginx의 에러로그를 볼 수 있다.
 > 그러나, 조금 더 편한 방법으로는 빈스톤 콘솔에서 로그를 클릭하고, 전체 로그를 요청해서 다운받은다음에, nginx폴더의 error텍스트를
 > 열어보면 더 편하게 볼 수 있다.(같은 로그다.)
@@ -218,8 +208,6 @@ worker_rlimit_nofile    33282;
 (3).**worker_processes** : nginx에서 몇 개의 워커 프로세스를 생성할 것인지를 지정하는 지시어이다. 1이면 모든 요청을 하나의
 프로세스로 실행하겠다는 의미이다. CPU 멀티코어 시스템에서 1이면 하나의 코어만으로 요청을 처리하겠다는 의미이다. 보통 명시적으로 서버에
 장착되어 있는 코어 수 만큼 할당하는 것이 보통이며, 그렇기에 auto로 주로 설정한다.
-
-<br>
 
 > EC2인스턴스는 인스턴스 종류마다 코어의 개수가 다르다. 그렇기에 auto로 설정하는 편이 좋다.
 > auto는 사용가능한 CPU 코어를 자동탐지하여 적용해준다.
@@ -244,8 +232,6 @@ nginx로 사용하는것이다.
 통상 worker_processes는 auto로 설정하지만, 운영체제를 위해서 CPU core수의 10\~20%는 남겨두는경우가 있다.
 예를 들면, 24core를 갖은 CPU라면 Nginx에서 사용할 코어수를 1\~20개 정도 할당하고 2\~4개는 OS용으로 남겨두는것이다.
 지금 당장은 적용할 필요는 없지만, 참고하도록하자.
-
-<br>
 
 > [user nginx의 의미 (1)](https://whatisthenext.tistory.com/123)    
 > [user nginx의 의미 (2)](https://narup.tistory.com/209)    
@@ -272,8 +258,6 @@ events {
 
 (1).**use epoll** : Linux커널 2.6이상인경우에 쓰이는 효율적인 이벤트 처리 방식이다.
 
-<br>
-
 > FreeBSD 4.1+, OpenBSD 2.9+, NetBSD 2.0 및 MacOS에서 순차적인 처리를 위한 방식으로 kqueue가 사용되고 있으나
 > Linux 2.6+ 이상에서 사용하는 효율적인 이벤트 처리 방식으로 epoll가 사용되고 있다. 여기서 말하는 순차적인 처리와 효율적인 이벤트
 > 처리 방식을 multi_accept에서 다시 설명하도록 하겠다.
@@ -284,8 +268,6 @@ events {
 그렇기에, 한번에 받을 수 있는 요청은 worker_processess(프로세스 수) X worker_connections수로
 정해진다. 통상 512, 1024를 기준으로 적어진다.
 
-<br>
-
 > 여기서 고려해야 할 사항은, 이 커넥션의 의미는 클라이언트와의 커넥션 뿐만이 아니라, 프록시 서버들간의 연결이나 아니면 다른 연결들에대해서도
 > 포함한 총 커넥션의 수라는것이다. 또한, 실제 동시 연결 커넥션 수는 오픈 되는 파일의 최대값을 넘을 수 없다는 거다. 이 값은
 > 위에서 설명한 worker_rlimit_nofile을 의미한다. 지금 당장은 고려하지 않아도 되지만, 서비스의 규모가 커지면 고려해야 할 부분이다.    
@@ -295,12 +277,8 @@ events {
 
 (3).**multi_accept** : 순차적으로 요청(커넥션)을 받지 않고 동시에 요청을 접수하는 방식이다. 디폴트값은 off이다.
 
-<br>
-
 > 위에 user가 epoll로 설정되어야만 사용할 수 있다. 만약 kqueue로 설정되어 있으면 해당 디렉티브(multi_accept on)는 무시되는데
 > 그 이유는 kqueue방식은 애초에 커넥션들을 순차적으로 받아들여기 위해 사용되는 방식이기 때문이다.
-
-<br>
 
 > [use epoll, kqueue (1)](https://couplewith.tistory.com/entry/%EA%BF%80%ED%8C%81-%EA%B3%A0%EC%84%B1%EB%8A%A5-Nginx%EB%A5%BC%EC%9C%84%ED%95%9C-%ED%8A%9C%EB%8B%9D-2-%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4-%EC%B2%98%EB%A6%AC%EB%9F%89-%EB%8A%98%EB%A6%AC%EA%B8%B0)       
 > [use epoll, kqueue (2)](https://nomaddream.tistory.com/19)   
@@ -332,13 +310,9 @@ http {
 http 블록은 Nginx 서버에 대한 동작을 설정하는 영역으로, server, location 블록을 포함한다.
 또한, 여기서 선언된 값은 하위블록에 상속된다.
 
-<br>
-
 > http 블록을 여러개 생성하여 관리할 수 있지만, 권장사항은 아니다. http블록을 하나만 생성하여 이용하는것이
 > 권장사항이다.     
 > [http블록 갯수 권장사항](https://taewooblog.tistory.com/74)
-
-<br>
 
 > [http 블록에 관하여 (1)](https://prohannah.tistory.com/136)
 > [http 블록에 관하여 (2)](https://taewooblog.tistory.com/74)
@@ -354,14 +328,10 @@ http 블록은 Nginx 서버에 대한 동작을 설정하는 영역으로, serve
 
 이곳에서도, mime.types 파일을 읽어들이거나 *.conf로 설정파일을 불러오고있다.
 
-<br>
-
 > 추가로 위의 include의 경로에 대해 알려주자면, include /etc~처럼 /로 시작하는 경우에는
 > 루트 디렉토리를 기반으로 시작한 경로의 파일을 의미하고 그냥 include conf.d/~로 사용하는 경우네는
 > 해당 코드(include conf.d/~)가 적혀진 파일의 위치를 기준 즉, 상대 경로로 해당 파일을 include 하겠다는
 > 의미이다.
-
-<br>
 
 > [include 지시어에 관하여 (1)](https://narup.tistory.com/209)    
 > [include 지시어에 관하여 (2)](https://aimaster.tistory.com/11)    
@@ -372,16 +342,12 @@ http 블록은 Nginx 서버에 대한 동작을 설정하는 영역으로, serve
 default_type의 default_type  application/octet-stream;는 옥텟 스트림 기반의 http를 사용한다는 의미이며,
 MIME 타입 설정이다.
 
-<br>
-
 > [default_type에 관하여 (1)](https://narup.tistory.com/209)    
 > [default_type에 관하여 (2)](https://kscory.com/dev/nginx/install)
 
 <br>
 
 log_format은 nginx의 access 로그의 형식을 지정해준다.
-
-<br>
 
 > 뒤에 나오는 access_log의 로그 형식을 지정한다. 또한, 앞서 언급한 error로그의 형식에는
 > 영향을 주지 않는다. 
@@ -409,13 +375,9 @@ proxy_pass 심플 디렉티브에서 더 자세히 보도록 하겠다.
 다음으로 upstream 다음에 명칭을 적게되는데 위에서는 springboot라고 적었지만, 얼마든지 내가 해당 origin 서버(server)를
 표현하고자 하는 명칭을 적어주면 된다. 이 부분이 뒤에 나올 proxy_pass에서 사용하게 된다.
 
-<br>
-
 > origin 서버는 하나의 컴퓨터로써 들어오는 요청에 대해 응답할 수 있게 구조화된 서버를 의미한다. 여기서는
 > WAS가 origin 서버이다.     
 > [origin server의 개념](https://www.cdnetworks.com/ko/knowledge-center/what-is-origin-server/)
-
-<br>
 
 > upstream의 한국어 의미는 상류이고, downstream의 한국어 의미는 하류이다. 물이 흘러 내려가서 받는 곳이 하류(downstream)이고
 > 윗쪽에서 물을 흘러 내려보내는 곳이 상류(upstream)이다. 물을 데이터 패킷으로 비유 하자면, 네트워크에서 데이터를 보내는 쪽 즉, 흘러 보내는
@@ -424,12 +386,8 @@ proxy_pass 심플 디렉티브에서 더 자세히 보도록 하겠다.
 > Nginx는 이 경우 WAS로 부터 데이터를 받는 쪽이니 downstream이 되는것이다.        
 > [upstream 지시어의 의미](https://developer88.tistory.com/299)     
 
-<br>
-
 > upstream 블록 지시어 안에 있는 심플 지시어 server는 아래에서 볼 server 블록 지시어와는 다른것이다.
 > 지시어의 명칭은 같지만 하나는 심플 지시어이고 다른 하나는 블록 지시어이다.
-
-<br>
 
 > [upstream 지시어와 server 지시어의 개념과 역활 (1)](https://developer88.tistory.com/299)      
 > [upstream 지시어와 server 지시어의 개념과 역활 (2)](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#upstream)      
@@ -446,8 +404,6 @@ proxy_pass 심플 디렉티브에서 더 자세히 보도록 하겠다.
 의미이다. keepalive 값을 설정했는데 만약 요청이 계속해서 들어오고 keepalive가 적용된 커넥션 수가
 설정 값에 다다르게 되면 초과되는 요청에 대해서는 LRU(Least Recently Used)에 따라서 가장 최근에
 사용되지않은 keepalive 커넥션의 소켓 연결을 닫는다.
-
-<br>
 
 > [upstream 지시어의 keepalive 하위 지시어 (1)](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive)    
 > [upstream 지시어의 keepalive 하위 지시어 (2)](https://fuirosun.tistory.com/entry/nginx-keepalive-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0)    
@@ -499,18 +455,12 @@ server_name이 매칭되는 도메인이 없는경우 해당 요청의 포트 �
 listen지시어 값이 80 default_server로 지정된 server블록에서 처리 하게 되는 것이다.    
 (바로 아래 server_name 지시어에 대한 설명이 나와있다.)
 
-<br>
-
 > listen HostName 혹은 IP주소 / 포트(port)로 적게 되어있는데, 'HostName 혹은 IP주소'에 대해서는
 > 언급하지 않고 가도록 하겠다.
-
-<br>
 
 > 만약, default_server가 따로 지정되어있지 않은경우 기본적으로 가장 먼저 정의된
 > 특정 포트에 대한 server블록이 default_server로 지정이 된다.     
 > [default_server의 자동 지정](http://i5on9i.blogspot.com/2016/01/nginx-server.html)
-
-<br>
 
 > listen [::]:80 와 같이 사용되면, 이는 IPv6형식의 요청을
 > 처리한다는 의미이다.    
@@ -532,12 +482,8 @@ www.real-test.com:80, m.real-test.com:80, real-test.net:80, real-test.co.kr:80�
 오면 모두 listen 80 default_server; 가 있는 server에서 요청을 모두 받아간다.(이 경우에 server블록이 하나밖에
 설정을 안한경우였다.)
 
-<br>
-
 > 위의 도메인들이 Route53으로 DNS 도메인설정을 했을때 얘기이다. 빈스톡 환경에서 
 > Route53을 이용한 도메인 연결은 다음 글에서 설명할것이다.
-
-<br>
 
 > [listen의 개념](https://architectophile.tistory.com/12)
 > [default_server의 개념 (1)](https://swiftcoding.org/nginx-routing)
@@ -562,17 +508,11 @@ server_name 지시어값과 달라서 해당 server 블록에는 매칭되지 �
 이를 조금 더 기능적으로 기술하자면,    
 클라이언트의 요청(request)의 header에 명시된 도메인값이 server_name값과 일치하는 경우 server블록에 분기해준다는 의미이다.
 
-<br>
-
 > 여기서 server_name에 들어갈 수 있는 값은 하위도메인(서브도메인, ex)www.도메인.com, m.도메인.com)이나 최상위 도메인이
 > 다른 도메인 ( ex)real-test.net, real-test.co.kr)이 들어갈 수 있다.
 
-<br>
-
 > server_name에 대한 개념을 보기위해 지시어를 넣어서 적어주었으나, 우리는 server_name지시어를 적지않고
 > 배포하도록 하겠다. 뒤에 하위도메인에 대한 처리나 리다이렉팅을 위해서 필요한 개념이니 반드시 알고가자.
-
-<br>
 
 > [server_name의 개념 (1)](https://swiftcoding.org/nginx-routing)    
 > [server_name의 개념 (2)](https://narup.tistory.com/209)      
