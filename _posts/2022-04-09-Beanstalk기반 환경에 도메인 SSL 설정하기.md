@@ -230,12 +230,28 @@ CNAME이 추가되면, 해당 CNAME 레코드 이름으로 요청이 들어오�
 ### 3.빈스톡(Beanstalk) 환경 구성에 SSL/TLS 인증서 등록하기
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/166397052-138ae7c6-df2a-4216-8ce9-2ccbe0f6c833.png">
+<img src="https://user-images.githubusercontent.com/59492312/166936544-3def4f69-1ef9-49e5-a2dc-c6070510bfcc.png">
 </p>
 
-이거 그거도 해야해 왜 route53에서 로드벨런서로 설정하여서 로드벨런서로 해야만 ssl이 적용되는지a
+이제는 빈스톡의 로드밸런서에 SSL/TLS 인증서를 등록할 차례이다.
+
+빈스톡 환경으로 이동해주면 왼쪽에 "구성"을 클릭해준다.
 
 <br>
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/166936558-e5f5a0ce-f39a-4830-9902-532d0b31742a.png">
+</p>
+
+이후 구성 요소들중에 "로드 밸런서"의 "편집" 아이콘을 클릭해준다.
+
+<br>
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/166936562-51e8a66b-f162-438a-a812-f0d5c847dd34.png">
+</p>
+
+b
 
 그것도 해야해 보니까 tls인가 인증서 버전을 1.3이상 올려야 한다. 등 이런얘기 하고 있어
 이거 정책아님 ?
