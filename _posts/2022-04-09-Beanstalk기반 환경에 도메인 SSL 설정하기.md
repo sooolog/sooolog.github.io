@@ -1,13 +1,12 @@
----
-layout: post
-title:  "Beanstalk기반 환경에 도메인 SSL 설정하기"
-categories: [ 도메인연결 ]
-image: https://user-images.githubusercontent.com/59492312/166184112-67d8e456-bad2-46c0-8df5-01528b404275.png
----
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59492312/166184112-67d8e456-bad2-46c0-8df5-01528b404275.png">
+</p>
+
+# 📖 Beanstalk기반 환경에 도메인 SSL 설정하기
 
 * HTTPS 작동원리와 SSL/TLS 인증서의 개념
 * ACM에서 SSL 인증서 발급받기
-* Beanstalk 환경에 ACM 인증서 등록하기
+* 빈스톡(Beanstalk) 환경 구성에 SSL/TLS 인증서 등록하기
 
 > 모든 코드는 [깃헙](https://github.com/sooolog/dev-spring-springboot)에 작성되어 있습니다.
 
@@ -251,97 +250,68 @@ CNAME이 추가되면, 해당 CNAME 레코드 이름으로 요청이 들어오�
 <img src="https://user-images.githubusercontent.com/59492312/166936562-51e8a66b-f162-438a-a812-f0d5c847dd34.png">
 </p>
 
-b
+이곳에서 "리스너 추가"버튼을 눌러주자.
 
-그것도 해야해 보니까 tls인가 인증서 버전을 1.3이상 올려야 한다. 등 이런얘기 하고 있어
-이거 정책아님 ?
-https://www.google.com/search?q=ssl+tls+%ED%95%A8%EA%BB%98+%EC%82%AC%EC%9A%A9&rlz=1C5CHFA_enKR982KR982&oq=ssl+tls+%ED%95%A8%EA%BB%98+%EC%82%AC%EC%9A%A9&aqs=chrome..69i57j33i160l2.8432j0j1&sourceid=chrome&ie=UTF-8
-
-
-지금 이거 보니 listen 443을 안하고 그냥 지금있는 그대로 쓰면
-불안정한 https연결이 될수도 있다는데 ?
-http://linforum.kr/bbs/board.php?bo_table=security&wr_id=104
-
-tls 정책과 관련해서 default_server에 대해서 얘기하는거 같은데 ?
-https://varins.com/library/server/web-server-nginx/
-
-a ssl기한도 있다고 한다.
-
-인증서 수정이 안돼
-
-보니까 https연결이 된다는것은 그냥 엔진엑스까지만 도달해도 된다는거네
-왜냐면, https://celebmine.com해도 정상적으로 https가 적용되니까,
-
-그리고 listen으로 포트먼저 듣고 그 다음 server_name으로 매칭한다는데
-https://jgj1018.github.io/server/2017/02/11/server1.html
-일치하는 listen 포트가없으면 server_name에 맞게 매치하는것같다.
-
-그럼 https://celebmine.com은 어떻게 매치하는걸까
-이거는 맞는 listen도 없고 맞는 server_name도 없으면 그냥
-default_server로..? 이건 말이 안되는데..?
+> 로드 밸런서는 클라이언트 요청을 리소스(EC2 등등)로 라우팅 하는 역활을 하는데, 이 때 리스너(listener)는 지정된 포트로 들어오는 요청만을
+> 받기 위해 포트 번호를 설정하거나 아니면 받은 요청에 대해 라우팅할 때 프로토콜도 설정할 수 있다. 기본적으로 로드 밸런서는 포트 80를 기본 리스너로 지정한다. 의
+> 이곳에서 443 포트에 대해 리스너 추가를 해주어야 로드 밸런서로 HTTPS 요청이 들어왔을때 정상적으로 EC2로 라우팅할 수 있게 해준다.
 
 <br>
-
-https://danidani-de.tistory.com/39
-아니 https리디렉션은 로드벨런서에서 해주는데 ?
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/153543841-c6377ecb-88be-4037-9fb8-b38a80b8a8fa.png">
+<img src="https://user-images.githubusercontent.com/59492312/166937079-9167aa32-6f66-47d0-b34f-ae8f4db6d090.png">
 </p>
 
-ㅁ 그, 그거 보여주자 DNs가 어떻게 작동하는지 그거보면 우선 도메인에 대한 IP를 받고
-그 다음에 http건 Https건 보내주게 되는거다. 즉, routte53은 ssl이랑 상관없고
-그저, 로드벨런서에 SSL인증서를 등록하여 사용하기 때문에 ROUTE53에서 라우팅 값을
-로드벨런서로 해줘야지 ssl이 정상작동된다는거였다.
+Application Load Balancer 리스너를 설정하여 추가할 수 있는 화면이 나온다.
 
-즉, 왜 빈스톡이아닌 route53에서 로드벨런서로 지정해줘야 ssl사용이 가능한지 그거 풀기
+포트는 443으로 설정해준다. 443 포트를 설정함으로써 HTTPS 요청도 받을 수 있도록 한다.
+프로토콜은 로드 밸런서가 받은 요청을 다시 라우팅해서 보내줄 때 사용되는 규약(프로토콜)을
+의미하는것이므로, HTTPS로 설정해주자.(우리는 EC2를 사용하니, EC2로 라우팅될 때의 프로토콜을 설정하는 것이다.)
 
-이게 A레코드로 celebmine.com만 하면, www.celebmine.com은 아무곳도
-가리키지않게된다. 근데, default_server 80이 되어있으니 그래도 이거 가리키는거
-아님 ? 맞다.(그때 default_server없애니 안들어가졌다.)
+SSL인증서는 우리가 방금전 ACM에서 요청하여 발급받은 SSL/TLS 인증서를 선택해주면 된다.
+이는 우리가 발급받은 SSL/TLS 인증서를 로드 밸런서에 등록하는것이다. 추후에 브라우저(클라이언트단)가
+HTTPS 통신으로 서버의 인증서를 확인하려 할 때 이 로드밸런서의 인증서를 확인하게 된다.
 
-#### 🪁 Reference
-* 참조링크 : []()
-* 참조링크 : []()
+SSL 정책은 간단히 말하면, 클라이언트와 로드 밸런서간의 HTTPS 통신에서 어떠한 암호화를
+협상하여 정할지 기준이 되는 정책이다. 여러 보안 정책들이 있지만, 호환성을 위해 ELBSecurityPolicy-2016-08 정책을 
+사용하는 것을 AWS에서는 추천한다.(ELBSecurityPolicy-2016-08가 default이나 ELBSecurityPolicy-TLS-1-1-2017-01과 같은
+보안 정책을 선택해도 HTTPS가 정상적으로 작동하긴한다.)
+
+> 필자는 이전에 [Beanstalk 환경 기반에서 Route53을 이용한 도메인 연결]()을 작성한적이 있다. 그곳에서 별칭으로 "트래픽 라우팅 대상"을
+> Elastic Beanstalk환경을 선택하지 않고 로드밸런서를 선택하여 설정을 해준적이 있다. 이러한 이유가 바로 로드 밸런서에 SSL/TLS 인증서를 등록해주기
+> 때문에 라우팅 대상 값이 로드 밸런서이여야 정상적으로 SSL/TLS 인증서를 인식하고 HTTPS 통신을 할 수 있기 때문이다.
+
+> [SSL 정책에 관하여 (1)](https://docs.aws.amazon.com/ko_kr/elasticloadbalancing/latest/application/create-https-listener.html#describe-ssl-policies)    
+> [SSL 정책에 관하여 (2)](https://comocode.tistory.com/28)    
 
 <br>
-
-
-
-### 2.
 
 <p align="center">
-<img src="">
+<img src="https://user-images.githubusercontent.com/59492312/166937097-3e9eb21a-201f-4eea-a366-57425b73982c.png">
 </p>
 
-AWS에서 제공해주는 SSL 인증서는 무료인 대신에, 해당 도메인의 DNS 서버로 Route53을 사용해야한다.
+끝으로, 리스너를 추가했으면 아래 "적용" 아이콘을 클릭해주자.
 
-#### 🪁 Reference
-* 참조링크 : []()
-* 참조링크 : []()
+잠시 후, 환경 재설정 시간이 지나고 인증서에 등록한 도메인으로 HTTPS 접속을 시도해보면
+정상적으로 적용이 되는것을 볼 수 있다.
 
 <br>
 
 
 
-### 🚀 추가로, 알아두면 좋을 HTTPS 기본 개념
+### 🚀 추가로,
 
 <p align="center">
-<img src="">
+<img src="https://user-images.githubusercontent.com/59492312/166397062-a6b3fdc5-1e59-4989-a321-4d3a990be7f5.png">
 </p>
 
-이메일 검증이아닌 DNS검증이 조 ㅎ은 이유
-
-3. TLS검증이 되지 않았을 경우 입니다.
-
-1번의 경우 도메인 구매시 등록한 admin 계정으로 매년 수동으로 갱신을 해주어야 합니다.
-2번의 경우 답이 없습니다. 무조건 DNS인증으로 변경해야합니다.
-3번의 경우 내가 a.com 이라는 도메인으로 서비스하고 있다고 가정했을때, AWS는 https://a.com 또는 https://www.a.com 에 요청을 보내서 HTTP응답 코드가 200일경우 자동갱신을 해주게 됩니다. 즉, 자동갱신이 되지 않았다는 것은 응답코드가 200코드가 아닌 상황이기때문에 응답코드가 왜 200이 아닌지 파악을 해봐야합니다.
-https://kim-dragon.tistory.com/6
-DNS인증을 사용하면 TLS검증을 시도하지 않으며, 따라서 관리자가 별도로 갱신을 해줄 필요가 없습니다. 단, ACM이 DNS검증올 검증한 인증서를 갱신하지 못한다면 DNS구성에 해당 CNAME 레코드가 없어졌거나 정확하지 않기 때문이므로 DNS서버 설정을 살펴봐야 합니다.
+ACM에서 SSL/TLS 인증서에 등록하기 위한 도메인을 입력하는 화면이다.
+이곳에서 입력을 안하고 그냥 지나가면 나중에 SSL/TLS 인증서가 발급되었을 때
+도메인 추가하거나 혹은 삭제할 수 없다. 만약에 추가하거나 삭제하려면 다시 ACM에서
+SSL/TLS 인증서 발급을 요청해야하니 이 점에 주의하도록 하자.
 
 <br>
 
 
 
-태그 : #
+태그 : #HTTPS, #SSL/TLS 인증서, #인증기관(CA), #ACM, #FQDN, #Listener, #리스너, #보안정책
