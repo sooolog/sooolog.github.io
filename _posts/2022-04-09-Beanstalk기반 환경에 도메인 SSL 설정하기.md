@@ -259,7 +259,7 @@ CNAME이 추가되면, 해당 CNAME 레코드 이름으로 요청이 들어오�
 <br>
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/166937079-9167aa32-6f66-47d0-b34f-ae8f4db6d090.png">
+<img src="https://user-images.githubusercontent.com/59492312/167127086-b4aaf3af-0e32-472b-b4f9-91f6d1aef560.png">
 </p>
 
 Application Load Balancer 리스너를 설정하여 추가할 수 있는 화면이 나온다.
