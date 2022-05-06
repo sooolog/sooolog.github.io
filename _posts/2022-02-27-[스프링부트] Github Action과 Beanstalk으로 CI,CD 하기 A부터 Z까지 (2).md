@@ -29,6 +29,8 @@ Travis CI + AWS Beanstalk
 하지만, 대세가 Travis CI에서 Github Action으로 넘어가고있으며, Auto Scaling과 Load Balancer, 클라우드 워치 등을 한번에
 관리할 수 있는 Beanstalk 또한 많이 사용되고 있기에 우리는 Github Action + Beanstalk으로 CI/CD 파이프라인을 구축해보도록 하겠다.
 
+<br>
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/59492312/151483421-031667e6-0d78-4a8e-94a6-12b933cbff47.png">
 </p>
@@ -55,8 +57,6 @@ Github repository의 action에서 템플릿을 만들어서 해당 코드들을 
 위의 그림처럼 루트 디렉토리에서 .github/workflows/deploy.yml을 만들어 준다. 저처럼 .github 폴더에 아이콘이 뜨길
 원한다면, [extra-icons 플러그인](https://plugins.jetbrains.com/plugin/11058-extra-icons)을 적용해주면 된다.
 이 외에도 인텔리제이 아이콘 플러그인 검색해서 원하는것을 설치하고 적용해 주면 된다. 
-
-<br>
 
 > 필자는 CI/CD 관련 코드들을 프로젝트 내에서 작성하여 한번에 관리하는것을 선호한다. Github에서 작성하여 적용하는
 > 방법도 있으니, 궁금하신분들은 찾아보셔서 한번쯤 공부해보는것도 좋다.
@@ -118,8 +118,6 @@ name은 위의 사진처럼 프로젝트의 해당 코드를 push하면 해당�
 조금 더 쉽게 말하자면, Commit했을때 설명 + deploy.yml의 name + 내가 여태 Push한 workflow갯수 로 표시되는거다.
 필자는 commit할때 github action build라고 commit message를 적었기에 이와같이 나온거다.
 
-<br>
-
 > 즉, 이 name은 Repo Action 탭에 나타나는 이름으로 실제 workflow 진행창에는 나오지 않는다. 그렇기에
 > build나 배포에 영향을 주는것은 아니고 통상 필자처럼 프로젝트명으로 입력하거나 원하는 nmae을 입력하면 된다.  
 > [name에 대한 내용](https://stalker5217.netlify.app/devops/github-action-aws-ci-cd-1/)
@@ -140,8 +138,6 @@ on:
 이 'master'가 들어가는 자리가 branch의 이름인데, 해당하는 branch 이름으로 push가 진행된다면
 Github Action이 시작된다는 의미이다. 즉, Github Action 트리거 브랜치인것이다. master로 적어놓았지만,
 다른 브랜치에서 Github Action을 실행시키고 싶다면 해당하는 branch 명을 바꾸어도 된다.
-
-<br>
 
 > 당연히, 지정한 브랜치외에 다른 명을 갖은 브랜치에서 push를 하게되고, 레포지토리에 pull request되어
 > merge가 진행이 되었다고 해도, Github Action은 실행되지 않는다. 추가로 push외에 pull request나
@@ -172,8 +168,6 @@ jobs:
 단계들을 말하며 해당 workflow를 말한다. job,step,workflow에 대해 잘 모른다면 만 아래의 '추가로'를 참고하자.)
 가 작동될 OS 환경 지정하는것이다.
 
-<br>
-
 > Github Action의 workflow는 Runner라고 하는 Github Action Runner 어플리케이션이 설치된 인스턴스 서버에서
 > 실행이 된다. 그 서버의 OS 환경을 지정하는것이다. 
 
@@ -181,8 +175,6 @@ jobs:
 
 일반적으로, 웹 서비스의 OS는 우분투보다는 센토를 많이 쓰는데, Github Action에서는 공식지원하는 OS목록에는
 Centos가 없기에 우분투를 대신 사용하도록 한다.
-
-<br>
 
 > 우분투를 선택한다고 해도, 우리가 하려는 CI/CD에는 영향을 주지않으니 걱정하지 않아도 된다.
 
@@ -242,8 +234,6 @@ jobs:
 다음 step인 gradle wrapper를 실행하여 build할 수 있도록 실행 권한 (+x)을 부여해주는 것이다.
 실제로 터미널에서 ./gradlew build 명령어로 빌드를 실행하는데, Permission Denied가 되기 때문에 그 전에
 chmod +x gradlew  를 터미널에 입력 하여 권한을 미리 부여해주는 것이다.
-
-<br>
 
 > run은 Runner에서 명령어를 실행하라는 의미이다.    
 > [./gradlew build를 위한 권한 부여](https://javalism.tistory.com/101)    
@@ -369,8 +359,6 @@ github action으로 build가 완료가 됬을때 확보한 시간을 github acti
 <img src="https://user-images.githubusercontent.com/59492312/151544083-af4a11b6-7388-4b97-b135-6dbba56250f4.png">
 </p>
 
-<br>
-
 > 깃헙 레포지토리에서 직접 Github Action을 실행시켜보고 확인해보면 더 정확하게 이해가 될 것이다.
 
 <br>
@@ -390,8 +378,6 @@ github action으로 build가 완료가 됬을때 확보한 시간을 github acti
 
 로컬 저장소에서(IntelliJ 등 그 외) 원격 저장소인 깃헙 레포지토리로 PUSH를 하게되면, github action이 실행된다.
 위와같이 빌드가 잘되면 모두 초록색으로 체크가 된다.
-
-<br>
 
 > 해당 화면을 보려면 내가 push한 레포지토리로 들어가서 위와같이 Actions탭을 누르면 된다.
 
