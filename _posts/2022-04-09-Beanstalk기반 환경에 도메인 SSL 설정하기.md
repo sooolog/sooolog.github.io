@@ -1,8 +1,9 @@
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59492312/166184112-67d8e456-bad2-46c0-8df5-01528b404275.png">
-</p>
-
-# 📖 Beanstalk기반 환경에 도메인 SSL 설정하기
+---
+layout: post
+title:  "Beanstalk기반 환경에 도메인 SSL 설정하기"
+categories: [ 도메인연결 ]
+image: https://user-images.githubusercontent.com/59492312/166184112-67d8e456-bad2-46c0-8df5-01528b404275.png
+---
 
 * HTTPS 작동원리와 SSL/TLS 인증서의 개념
 * ACM에서 SSL 인증서 발급받기
