@@ -48,8 +48,6 @@ META-INF와 MANIFEST.MF 들을 하나로 압축하는 과정을 의미한다. �
 또한, 빌드 과정을 도와주는 도구를 Build Tool이라고 한다. 즉, 컴파일 된 코드를 실제 실행할 수 있는 상태로 만드는 
 일을 Build 라는 개념으로 생각하면 된다.
 
-<br>
-
 > 스프링부트 프로젝트에서 쓰는 Gradle도 Build Tool의 일종이다.
 
 <br>
@@ -70,8 +68,6 @@ META-INF와 MANIFEST.MF 들을 하나로 압축하는 과정을 의미한다. �
 테스트 되어 공유 레포지토리에 병합되는것을 얘기 한다. 즉, 이를 수동이 아닌 자동으로 지속적으로 쉽게 해주는 환경(CI)을 말한다.
 (CI의 단계와 순서에 대해서는 글 후반부에 추가적으로 얘기하겠다.)
 
-<br>
-
 > 여기서 우리가 사용하는 Git은 형상관리(=구성관리)툴로, 버전이나 변경사항을 체계적으로 추적하고 통제하는것을 가능하게 해준다.
 
 <br>
@@ -80,7 +76,6 @@ META-INF와 MANIFEST.MF 들을 하나로 압축하는 과정을 의미한다. �
 * 참조링크 : [빌드의 개념](https://choseongho93.tistory.com/296)
 * 참조링크 : [CI의 전반적인 개념](https://artist-developer.tistory.com/24)
 * 참조링크 : [형상관리,구성관리 개념](https://ko.wikipedia.org/wiki/%EA%B5%AC%EC%84%B1_%EA%B4%80%EB%A6%AC)
-
 
 <br>
 
@@ -142,8 +137,6 @@ CI/CD 파이프라인은 개발 플로우마다 조금씩 다르거나 추가될
 그게 아니면 여러 개발자가 branch를 만들고, 로컬 저장소에서 코드작성과 테스트까지 진행한 후에 원격 레포지토리에 push를
 하게하고(master 브랜치가 push 했을때만 build되게 설) 이를 merge하여, master 브랜치에서 최종 test를 하고 다시 정
 원격 레포지토리에 push하여 test를 하며 build를 진행할 수도 있다. 즉, 이 CI/CD의 과정은 개발 플로우에 따라 얼마든지 달라질 수 있다는것을 알고가자.
-
-<br>
 
 > [첫번째 CI/CD순서](https://abbo.tistory.com/225)   
 > [두번째 CI/CD순서](https://ggn0.tistory.com/118)    
